@@ -12,9 +12,9 @@
 import { readdirSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 
-import { chunkMarkdown, type Chunk } from "./chunk.ts";
+import { chunkMarkdown, type Chunk } from "./markdown/chunk.ts";
 import { countChunks, getDb, insertChunk, resetDatabase } from "./db.ts";
-import type { Bucket } from "./frontmatter.ts";
+import type { Bucket } from "./markdown/frontmatter.ts";
 import { embed } from "./embed.ts";
 
 /**

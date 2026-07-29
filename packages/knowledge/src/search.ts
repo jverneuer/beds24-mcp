@@ -18,8 +18,8 @@
 
 import { getDb, countChunks } from "./db.ts";
 import { embed } from "./embed.ts";
-import { KNOWN_BUCKETS, SAFE_BUCKETS } from "./frontmatter.ts";
-import type { Bucket } from "./frontmatter.ts";
+import { KNOWN_BUCKETS, SAFE_BUCKETS } from "./markdown/frontmatter.ts";
+import type { Bucket } from "./markdown/frontmatter.ts";
 
 /** RRF constant — dampens the contribution of low-ranking candidates. */
 const RRF_K = 60;

@@ -8,7 +8,7 @@
 
 import { readFileSync } from "node:fs";
 import yaml from "js-yaml";
-import { defaultSpecDir } from "./paths.js";
+import { defaultSpecDir } from "../paths.js";
 
 /** A single flattened field of a resolved schema. */
 export interface Field {

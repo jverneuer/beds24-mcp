@@ -12,10 +12,10 @@
  * ```
  */
 
-export { KNOWN_BUCKETS, SAFE_BUCKETS, parseFrontmatter } from "./frontmatter.ts";
-export type { Bucket, Frontmatter } from "./frontmatter.ts";
+export { KNOWN_BUCKETS, SAFE_BUCKETS, parseFrontmatter } from "./markdown/frontmatter.ts";
+export type { Bucket, Frontmatter } from "./markdown/frontmatter.ts";
 
-export { chunkMarkdown, type Chunk } from "./chunk.ts";
+export { chunkMarkdown, type Chunk } from "./markdown/chunk.ts";
 
 export { buildIndex, type BuildResult } from "./indexer.ts";
 

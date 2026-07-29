@@ -16,7 +16,7 @@
 
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { parseFrontmatter, type Bucket } from "../packages/knowledge/src/frontmatter.ts";
+import { parseFrontmatter, type Bucket } from "../packages/knowledge/src/markdown/frontmatter.ts";
 
 const CORPUS_ROOT = join(process.cwd(), "packages", "knowledge", "knowledge");
 const DRY_RUN = process.argv.includes("--dry-run");

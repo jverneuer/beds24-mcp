@@ -11,8 +11,8 @@
  * refreshes once (single-flight — concurrent calls share one refresh promise).
  */
 
-import { getSchema, listEndpoints } from "./schema.ts";
-import { validateRequest } from "./validate.ts";
+import { getSchema, listEndpoints } from "./schema/schema.ts";
+import { validateRequest } from "./schema/validate.ts";
 import { defaultSpecDir } from "./paths.ts";
 
 /** Base URL for the Beds24 JSON API. */

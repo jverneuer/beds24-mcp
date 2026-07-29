@@ -32,7 +32,7 @@ export {
 	validateRequest,
 	type ValidationError,
 	type ValidationResult,
-} from "./validate.ts";
+} from "./schema/validate.ts";
 
 export {
 	getSchema,
@@ -42,4 +42,4 @@ export {
 	__resetSchemaIndex,
 	type Field,
 	type EndpointSchema,
-} from "./schema.ts";
+} from "./schema/schema.ts";
