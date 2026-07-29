@@ -1,7 +1,8 @@
 {
-  "name": "beds24-mcp-server",
+  "name": "beds24-mcp",
   "version": "1.1.5",
-  "description": "MCP server + CLI + SDK for the Beds24 API — semantic search over cited docs, YAML schema validation, and a dependency-free TS SDK.",
+  "private": true,
+  "description": "MCP server + CLI + SDK for the Beds24 API — semantic search over cited docs, YAML schema validation, and a typed V2 SDK. npm-workspace monorepo (sdk / knowledge / server).",
   "repository": {
     "type": "git",
     "url": "https://github.com/jverneuer/beds24-mcp.git"
@@ -23,44 +24,29 @@
     "vector-index"
   ],
   "type": "module",
-  "bin": {
-    "beds24-mcp-server": "dist/cli.mjs"
-  },
-  "main": "dist/sdk/index.js",
-  "exports": {
-    ".": "./dist/sdk/index.js",
-    "./sdk": "./dist/sdk/index.js",
-    "./client": "./dist/sdk/client.js",
-    "./ops": "./dist/sdk/ops/index.js",
-    "./search": "./dist/sdk/search.js",
-    "./validate": "./dist/sdk/validate.js",
-    "./schema": "./dist/sdk/schema.js",
-    "./indexer": "./dist/sdk/indexer.js",
-    "./types": "./dist/sdk/generated/types.d.ts",
-    "./package.json": "./package.json"
-  },
-  "files": [
-    "dist",
-    "knowledge",
-    "README.md",
-    "LICENSE"
+  "workspaces": [
+    "packages/*"
   ],
   "engines": {
     "node": ">=24.0.0"
   },
   "scripts": {
-    "dev": "bun run src/server.ts",
-    "serve": "bun run src/cli.ts serve",
-    "index": "bun run src/cli.ts index",
-    "reindex": "bun run src/cli.ts index --force",
-    "status": "bun run src/cli.ts status",
-    "setup": "bun run src/cli.ts setup",
+    "dev": "bun run packages/server/src/server.ts",
+    "serve": "bun run packages/server/src/cli.ts serve",
+    "index": "bun run packages/server/src/cli.ts index",
+    "reindex": "bun run packages/server/src/cli.ts index --force",
+    "status": "bun run packages/server/src/cli.ts status",
+    "setup": "bun run packages/server/src/cli.ts setup",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "fetch-spec": "bun run scripts/fetch-spec.ts",
     "generate-types": "bun run scripts/generate-types.ts",
+    "add-frontmatter": "bun run scripts/add-frontmatter.ts",
     "prebuild": "bun run fetch-spec && bun run generate-types",
-    "build": "bun build src/cli.ts --target node --packages=external --outfile dist/cli.mjs --banner '#!/usr/bin/env node' && chmod +x dist/cli.mjs && bun build src/sdk/index.ts src/sdk/beds24.ts src/sdk/client.ts src/sdk/ops/index.ts src/sdk/search.ts src/sdk/validate.ts src/sdk/schema.ts src/sdk/indexer.ts --target node --packages=external --outdir dist/sdk --sourcemap && mkdir -p dist/sdk/generated && cp src/sdk/generated/types.d.ts dist/sdk/generated/types.d.ts",
+    "build": "bun run build:sdk && bun run build:knowledge && bun run build:server",
+    "build:sdk": "bun build packages/sdk/src/index.ts packages/sdk/src/client.ts packages/sdk/src/ops/index.ts packages/sdk/src/validate.ts packages/sdk/src/schema.ts --target node --packages=external --outdir packages/sdk/dist --sourcemap && mkdir -p packages/sdk/dist/generated && cp packages/sdk/src/generated/types.d.ts packages/sdk/dist/generated/types.d.ts",
+    "build:knowledge": "bun build packages/knowledge/src/index.ts --target node --packages=external --outfile packages/knowledge/dist/index.js --sourcemap",
+    "build:server": "bun build packages/server/src/cli.ts --target node --packages=external --outfile dist/cli.mjs --banner '#!/usr/bin/env node' && chmod +x dist/cli.mjs",
     "prepublishOnly": "bun run typecheck && bun run build"
   },
   "dependencies": {
@@ -68,6 +54,8 @@
     "@modelcontextprotocol/sdk": "^1.10.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
+    "beds24-knowledge": "workspace:*",
+    "beds24-sdk": "workspace:*",
     "js-yaml": "^4.1.0",
     "libsql": "^0.4.0",
     "openapi-fetch": "^0.17.0",

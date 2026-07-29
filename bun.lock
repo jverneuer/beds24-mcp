@@ -9,6 +9,8 @@
         "@modelcontextprotocol/sdk": "^1.10.0",
         "ajv": "^8.17.1",
         "ajv-formats": "^3.0.1",
+        "beds24-knowledge": "workspace:*",
+        "beds24-sdk": "workspace:*",
         "js-yaml": "^4.1.0",
         "libsql": "^0.4.0",
         "openapi-fetch": "^0.17.0",
@@ -21,6 +23,48 @@
         "@types/node": "^22.10.0",
         "bun-types": "^1.2.0",
         "openapi-typescript": "^7.13.0",
+        "typescript": "^5.7.0",
+      },
+    },
+    "packages/knowledge": {
+      "name": "beds24-knowledge",
+      "version": "1.1.5",
+      "dependencies": {
+        "@huggingface/transformers": "^3.5.0",
+        "libsql": "^0.4.0",
+        "sqlite-vec": "^0.1.7",
+      },
+      "devDependencies": {
+        "typescript": "^5.7.0",
+      },
+    },
+    "packages/sdk": {
+      "name": "beds24-sdk",
+      "version": "1.1.5",
+      "dependencies": {
+        "ajv": "^8.17.1",
+        "ajv-formats": "^3.0.1",
+        "js-yaml": "^4.1.0",
+        "openapi-fetch": "^0.17.0",
+      },
+      "devDependencies": {
+        "@types/js-yaml": "^4.0.9",
+        "typescript": "^5.7.0",
+      },
+    },
+    "packages/server": {
+      "name": "beds24-mcp-server",
+      "version": "1.1.5",
+      "bin": {
+        "beds24-mcp-server": "dist/cli.mjs",
+      },
+      "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.10.0",
+        "beds24-knowledge": "workspace:*",
+        "beds24-sdk": "workspace:*",
+        "zod": "^3.23.0",
+      },
+      "devDependencies": {
         "typescript": "^5.7.0",
       },
     },
@@ -151,6 +195,12 @@
     "argparse": ["argparse@2.0.1", "", {}, "sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q=="],
 
     "balanced-match": ["balanced-match@1.0.2", "", {}, "sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw=="],
+
+    "beds24-knowledge": ["beds24-knowledge@workspace:packages/knowledge"],
+
+    "beds24-mcp-server": ["beds24-mcp-server@workspace:packages/server"],
+
+    "beds24-sdk": ["beds24-sdk@workspace:packages/sdk"],
 
     "body-parser": ["body-parser@2.3.0", "", { "dependencies": { "bytes": "^3.1.2", "content-type": "^2.0.0", "debug": "^4.4.3", "http-errors": "^2.0.1", "iconv-lite": "^0.7.2", "on-finished": "^2.4.1", "qs": "^6.15.2", "raw-body": "^3.0.2", "type-is": "^2.1.0" } }, "sha512-2cGmJupaNgg+QUwVLAucDuWuoMZ6EX9iHDRswZ5lsNYEmwPaRknMPCLZz07yTzVq/83p4o/wzbDZbBrTvGGTIw=="],
 

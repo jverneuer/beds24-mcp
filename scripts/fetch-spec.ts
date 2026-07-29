@@ -4,6 +4,9 @@
  *   bun run scripts/fetch-spec.ts            # fetch + diff; rewrite only if changed
  *   bun run scripts/fetch-spec.ts --force    # always rewrite the local copy
  *
+ * The spec is owned by the `beds24-sdk` package and lives at packages/sdk/apiV2.yaml
+ * (NOT knowledge/apiV2.yaml — that path is gone in the restructured monorepo).
+ *
  * Drift detection is semantic, not textual: both docs are parsed to JSON and
  * re-serialized with sorted keys, so upstream reordering/comment-churn doesn't
  * count as a change. We diff the resolved endpoint set + component schema names
@@ -12,12 +15,12 @@
  * mirror — not a re-serialization of our parser.
  */
 
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import yaml from "js-yaml";
 
 const UPSTREAM_URL = "https://beds24.com/api/v2/apiV2.yaml";
-const LOCAL_PATH = join(process.cwd(), "knowledge", "apiV2.yaml");
+const LOCAL_PATH = join(process.cwd(), "packages", "sdk", "apiV2.yaml");
 const FORCE = process.argv.includes("--force");
 
 /** Any JS value → deep-sorted-keys JSON (stable canonical form for comparison). */
@@ -88,7 +91,6 @@ async function main(): Promise<void> {
 
 	const localText = (() => {
 		try {
-			const { readFileSync } = require("node:fs") as typeof import("node:fs");
 			return readFileSync(LOCAL_PATH, "utf8");
 		} catch {
 			return null;
