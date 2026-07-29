@@ -13,6 +13,19 @@ export { Beds24Client, Beds24Error, Scopes, ErrorCode, DEFAULT_BASE_URL, type Be
 export * from "./ops/index.ts";
 
 export { buildIndex, type BuildResult } from "./indexer.ts";
+
+// Generated OpenAPI types (from knowledge/apiV2.yaml via openapi-typescript).
+// `paths` describes every endpoint's request/response/query/path types; import
+// it to use the typed transport (`createClient<paths>`) or for type-level
+// introspection. Regenerate with `bun run generate-types`.
+export type { paths, components, operations } from "./generated/types";
+
+// Typed fetch transport companion to the generated types. Use it directly for
+// per-endpoint, fully-typed calls:
+//   const api = createClient<paths>({ baseUrl: "..." });
+//   const { data } = await api.GET("/bookings", { params: { query: { id: [1] } } });
+// Or wrap it (as Beds24Client does) to add auth / credit tracking / retry.
+export { default as createClient } from "openapi-fetch";
 export { search, Beds24Search, type SearchHit } from "./search.ts";
 export { Beds24Validator, validateRequest, type ValidationError, type ValidationResult } from "./validate.ts";
 export {

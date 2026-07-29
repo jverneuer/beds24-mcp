@@ -36,6 +36,7 @@
     "./validate": "./dist/sdk/validate.js",
     "./schema": "./dist/sdk/schema.js",
     "./indexer": "./dist/sdk/indexer.js",
+    "./types": "./dist/sdk/generated/types.d.ts",
     "./package.json": "./package.json"
   },
   "files": [
@@ -56,7 +57,10 @@
     "setup": "bun run src/cli.ts setup",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "build": "bun build src/cli.ts --target node --packages=external --outfile dist/cli.mjs --banner '#!/usr/bin/env node' && chmod +x dist/cli.mjs && bun build src/sdk/index.ts src/sdk/beds24.ts src/sdk/client.ts src/sdk/ops/index.ts src/sdk/search.ts src/sdk/validate.ts src/sdk/schema.ts src/sdk/indexer.ts --target node --packages=external --outdir dist/sdk --sourcemap",
+    "fetch-spec": "bun run scripts/fetch-spec.ts",
+    "generate-types": "bun run scripts/generate-types.ts",
+    "prebuild": "bun run fetch-spec && bun run generate-types",
+    "build": "bun build src/cli.ts --target node --packages=external --outfile dist/cli.mjs --banner '#!/usr/bin/env node' && chmod +x dist/cli.mjs && bun build src/sdk/index.ts src/sdk/beds24.ts src/sdk/client.ts src/sdk/ops/index.ts src/sdk/search.ts src/sdk/validate.ts src/sdk/schema.ts src/sdk/indexer.ts --target node --packages=external --outdir dist/sdk --sourcemap && mkdir -p dist/sdk/generated && cp src/sdk/generated/types.d.ts dist/sdk/generated/types.d.ts",
     "prepublishOnly": "bun run typecheck && bun run build"
   },
   "dependencies": {
@@ -66,14 +70,16 @@
     "ajv-formats": "^3.0.1",
     "js-yaml": "^4.1.0",
     "libsql": "^0.4.0",
+    "openapi-fetch": "^0.17.0",
     "sqlite-vec": "^0.1.7",
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@types/bun": "latest",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.0",
     "bun-types": "^1.2.0",
-    "typescript": "^5.7.0",
-    "@types/bun": "latest"
+    "openapi-typescript": "^7.13.0",
+    "typescript": "^5.7.0"
   }
 }

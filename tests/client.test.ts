@@ -16,8 +16,19 @@ interface FetchCall {
 function createMockFetch() {
 	let responses: Response[] = [];
 	let calls: FetchCall[] = [];
-	const fn = async (url: string, init?: RequestInit): Promise<Response> => {
-		calls.push({ url, init });
+	const fn = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+		// openapi-fetch sends a `Request` object (headers live on it); the raw
+		// token fetch sends `(url, init)`. Normalize both to { url, init }.
+		let url: string;
+		let headers: HeadersInit | undefined;
+		if (input instanceof Request) {
+			url = input.url;
+			headers = Object.fromEntries(input.headers.entries());
+		} else {
+			url = typeof input === "string" ? input : input.toString();
+			headers = init?.headers;
+		}
+		calls.push({ url, init: init ?? { headers } });
 		const next = responses.shift();
 		if (!next) throw new Error("unexpected fetch: " + url);
 		return next;

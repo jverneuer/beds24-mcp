@@ -11,9 +11,11 @@
  * refreshes once (single-flight — concurrent calls share one refresh promise).
  */
 
+import createClient, { type Client } from "openapi-fetch";
 import { getSchema, listEndpoints } from "./schema.ts";
 import { validateRequest } from "./validate.ts";
 import { defaultKnowledgeDir } from "./paths.ts";
+import type { paths } from "./generated/types";
 
 /** Base URL for the Beds24 JSON API. */
 export const DEFAULT_BASE_URL = "https://www.beds24.com/api";
@@ -124,6 +126,14 @@ export class Beds24Client {
 	/** All `METHOD /path` keys the spec knows about. */
 	readonly endpoints: string[];
 
+	/**
+	 * Typed transport. openapi-fetch owns URL construction, query/path-param
+	 * serialization, and request/response typing against the generated `paths`.
+	 * Beds24Client wraps it with auth, credit tracking, 401-retry, and
+	 * pre-flight validation.
+	 */
+	private readonly api: Client<paths>;
+
 	constructor(config: Beds24ClientConfig) {
 		this.apiKey = config.apiKey;
 		this.propKey = config.propKey;
@@ -131,6 +141,7 @@ export class Beds24Client {
 		this.token = config.token ?? null;
 		this.signal = config.signal;
 		this.endpoints = listEndpoints(resolveFactsDir());
+		this.api = createClient<paths>({ baseUrl: this.baseUrl });
 	}
 
 	/** Fetch (or refresh) the 24h token. Single-flight under concurrency. */
@@ -213,18 +224,27 @@ export class Beds24Client {
 		body: unknown,
 		opts?: { idempotencyKey?: string; signal?: AbortSignal },
 	): Promise<Beds24Response<T>> {
-		const url = `${this.baseUrl}${ep.path}`;
-		const headers: Record<string, string> = { token };
-		if (opts?.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
+		// openapi-fetch keys are UPPERCASE HTTP methods ("GET", "POST", …).
+		const method = ep.method.toUpperCase() as "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
-		let res: Response;
+		// The generated ClientMethod signatures are per-path/per-method; our
+		// `body` is generic `unknown`, so we dispatch through a small cast. The
+		// typing benefit of openapi-fetch is fully realized for callers who use
+		// the client's typed methods directly (`client.GET("/bookings", { params })`);
+		// the generic `request()` entry point stays dynamically typed by design.
+		const fn = this.api[method] as (path: string, init?: Record<string, unknown>) => Promise<{
+			data: unknown;
+			error: unknown;
+			response: Response;
+		}>;
+
+		let result: { data: unknown; error: unknown; response: Response };
 		try {
-			const init: RequestInit = { method: ep.method, headers, signal: opts?.signal ?? this.signal };
-			if (body !== undefined) {
-				headers["Content-Type"] = "application/json";
-				init.body = JSON.stringify(body);
-			}
-			res = await fetch(url, init);
+			const headers: Record<string, string> = { token };
+			if (opts?.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
+			const init: Record<string, unknown> = { headers, signal: opts?.signal ?? this.signal };
+			if (body !== undefined) init.body = body;
+			result = await fn(ep.path, init);
 		} catch (e) {
 			throw new Beds24Error({
 				message: `network error: ${(e as Error).message}`,
@@ -233,20 +253,13 @@ export class Beds24Client {
 			});
 		}
 
-		const credits = parseCredits(res);
+		const { data, error, response } = result;
+		const credits = parseCredits(response);
 
-		let data: unknown;
-		const text = await res.text();
-		if (text) {
-			try {
-				data = JSON.parse(text);
-			} catch {
-				data = text;
-			}
-		}
-
-		if (!res.ok) {
-			throw this.makeError(res.status, data, credits);
+		if (!response.ok) {
+			// openapi-fetch returns HTTP errors in `error` (parsed body) without
+			// throwing; fall back to `data` if the body wasn't an error document.
+			throw this.makeError(response.status, error ?? data, credits);
 		}
 
 		return { data: data as T, credits };
