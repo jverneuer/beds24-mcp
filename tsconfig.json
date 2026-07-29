@@ -12,6 +12,11 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "zod": ["./node_modules/@modelcontextprotocol/sdk/node_modules/zod/v3"],
+      "zod/*": ["./node_modules/@modelcontextprotocol/sdk/node_modules/zod/v3/*"]
+    },
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUnusedLocals": true,
