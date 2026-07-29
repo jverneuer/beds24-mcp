@@ -14,8 +14,8 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "zod": ["./node_modules/@modelcontextprotocol/sdk/node_modules/zod/v3"],
-      "zod/*": ["./node_modules/@modelcontextprotocol/sdk/node_modules/zod/v3/*"]
+      "zod": ["./node_modules/.bun/zod@4.4.3/node_modules/zod/v4"],
+      "zod/*": ["./node_modules/.bun/zod@4.4.3/node_modules/zod/v4/*"]
     },
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
@@ -23,6 +23,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", ".beds24"]
+  "include": ["packages/*/src/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules", ".beds24", "packages/*/dist"]
 }

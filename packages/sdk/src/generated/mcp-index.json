@@ -1,0 +1,1853 @@
+{
+  "version": 1,
+  "builtAt": "2026-07-29T20:25:13.005Z",
+  "source": "packages/sdk/apiV2.yaml",
+  "endpointCount": 38,
+  "endpoints": [
+    {
+      "operation": "DELETE /authentication/token",
+      "method": "DELETE",
+      "path": "/authentication/token",
+      "operationId": "",
+      "summary": "Delete a refresh token",
+      "description": "",
+      "tags": [
+        "Authentication"
+      ],
+      "parameters": [
+        {
+          "name": "refreshToken",
+          "location": "header",
+          "required": true,
+          "schemaType": "string",
+          "description": ""
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "DELETE /bookings",
+      "method": "DELETE",
+      "path": "/bookings",
+      "operationId": "",
+      "summary": "Delete bookings by id",
+      "description": "",
+      "tags": [
+        "Bookings"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "The booking ID. Multiple ids can be included."
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "DELETE /properties",
+      "method": "DELETE",
+      "path": "/properties",
+      "operationId": "",
+      "summary": "Coming soon - Delete properties by id",
+      "description": "",
+      "tags": [
+        "Properties"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "The property ID. Multiple ids can be included."
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "DELETE /properties/rooms",
+      "method": "DELETE",
+      "path": "/properties/rooms",
+      "operationId": "",
+      "summary": "Coming soon - Delete rooms by id",
+      "description": "",
+      "tags": [
+        "Properties"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "The room ID. Multiple ids can be included."
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /accounts",
+      "method": "GET",
+      "path": "/accounts",
+      "operationId": "",
+      "summary": "Alpha - Get accounts",
+      "description": "",
+      "tags": [
+        "Accounts"
+      ],
+      "parameters": [
+        {
+          "name": "includeSubAccounts",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "includeUsage",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "includeLanguages",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /authentication/details",
+      "method": "GET",
+      "path": "/authentication/details",
+      "operationId": "",
+      "summary": "Get information about a token and diagnostics",
+      "description": "",
+      "tags": [
+        "Authentication"
+      ],
+      "parameters": [
+        {
+          "name": "token",
+          "location": "header",
+          "required": false,
+          "schemaType": "string",
+          "description": ""
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "diagnostics",
+        "token",
+        "validToken"
+      ],
+      "responseSchemaRef": "tokenDetails"
+    },
+    {
+      "operation": "GET /authentication/setup",
+      "method": "GET",
+      "path": "/authentication/setup",
+      "operationId": "",
+      "summary": "Get a refresh token using an invite code",
+      "description": "Note: Refresh tokens do not expire so long as they have been used within the past 30 days\n\nCodes can be generated here [https://beds24.com/control3.php?pagetype=apiv2](https://beds24.com/control3.php?pagetype=apiv2)\n\nPossible scopes are:\nbookings\nbookings-personal\nbookings-financial\ninventory\nproperties\naccounts\nchannels\n",
+      "tags": [
+        "Authentication"
+      ],
+      "parameters": [
+        {
+          "name": "code",
+          "location": "header",
+          "required": true,
+          "schemaType": "string",
+          "description": ""
+        },
+        {
+          "name": "deviceName",
+          "location": "header",
+          "required": false,
+          "schemaType": "string",
+          "description": ""
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "expiresIn",
+        "refreshToken",
+        "token"
+      ],
+      "responseSchemaRef": "refreshToken"
+    },
+    {
+      "operation": "GET /authentication/token",
+      "method": "GET",
+      "path": "/authentication/token",
+      "operationId": "",
+      "summary": "Get an authentication token using a refresh token",
+      "description": "Note: Refresh tokens do not expire so long as they have been used within the past 30 days\n",
+      "tags": [
+        "Authentication"
+      ],
+      "parameters": [
+        {
+          "name": "refreshToken",
+          "location": "header",
+          "required": true,
+          "schemaType": "string",
+          "description": ""
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "expiresIn",
+        "token"
+      ],
+      "responseSchemaRef": "token"
+    },
+    {
+      "operation": "GET /bookings",
+      "method": "GET",
+      "path": "/bookings",
+      "operationId": "",
+      "summary": "Get bookings matching specified criteria",
+      "description": "By default only upcoming bookings will be returned",
+      "tags": [
+        "Bookings"
+      ],
+      "parameters": [
+        {
+          "name": "filter",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "arrivals - returns bookings arriving today <br>\ndepartures - confirmed, new and request bookings departing today  <br>\nnew - returns bookings created in the past 24 hours <br>\ncurrent - returns bookings with a check-in before or on today and a check out after or on today <br>\nBy default, filters will only return bookings with a status of of confirmed, new or request. <br>\nAll dates are in the property's time zone.\n"
+        },
+        {
+          "name": "propertyId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "Multiple propertyIds can be included"
+        },
+        {
+          "name": "roomId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "Multiple roomIds can be included"
+        },
+        {
+          "name": "id",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "The booking ID. Multiple ids can be included."
+        },
+        {
+          "name": "masterId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "Multiple masterIds can be included"
+        },
+        {
+          "name": "apiReference",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "Multiple apiReferences can be included"
+        },
+        {
+          "name": "channel",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "The channel"
+        },
+        {
+          "name": "arrival",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "Gets bookings with an arrival date matching this. YYYY-MM-DD"
+        },
+        {
+          "name": "arrivalFrom",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "Gets bookings with an arrival date after this. YYYY-MM-DD"
+        },
+        {
+          "name": "arrivalTo",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "Gets bookings with an arrival date before this. YYYY-MM-DD"
+        },
+        {
+          "name": "departure",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "Gets bookings with an departure date matching this. YYYY-MM-DD"
+        },
+        {
+          "name": "departureFrom",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "Gets bookings with an departure date after this. YYYY-MM-DD"
+        },
+        {
+          "name": "departureTo",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "Gets bookings with an departure date before this. YYYY-MM-DD"
+        },
+        {
+          "name": "bookingTimeFrom",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "Gets bookings with a booking time after this. YYYY-MM-DDTHH:MM:SS in UTC"
+        },
+        {
+          "name": "bookingTimeTo",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "Gets bookings with a booking time before this. YYYY-MM-DDTHH:MM:SS in UTC"
+        },
+        {
+          "name": "modifiedFrom",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "Gets bookings with a modified datetime after this. When bookings are created their modified time will be set to their created time. YYYY-MM-DDTHH:MM:SS"
+        },
+        {
+          "name": "modifiedTo",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "Gets bookings with a modified datetime before this. When bookings are created their modified time will be set to their created time. YYYY-MM-DDTHH:MM:SS"
+        },
+        {
+          "name": "searchString",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "Gets bookings where the guest name, email, apiref or bookingId fields match this parameter."
+        },
+        {
+          "name": "includeInvoiceItems",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "includeInfoItems",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "includeGuests",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": "Guest data requires the bookings-personal scope"
+        },
+        {
+          "name": "includeBookingGroup",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": "Returns the bookingGroup field, which contains IDs of other bookings in the booking group"
+        },
+        {
+          "name": "status",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "Will default to \"confirmed\", \"request\", \"new\", \"black\" and \"inquiry\" if not specified"
+        },
+        {
+          "name": "page",
+          "location": "query",
+          "required": false,
+          "schemaType": "integer",
+          "description": "Get a page of items beyond the first"
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /bookings/invoices",
+      "method": "GET",
+      "path": "/bookings/invoices",
+      "operationId": "",
+      "summary": "Alpha - Get invoices",
+      "description": "",
+      "tags": [
+        "Bookings"
+      ],
+      "parameters": [
+        {
+          "name": "bookingId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "page",
+          "location": "query",
+          "required": false,
+          "schemaType": "integer",
+          "description": "Get a page of items beyond the first"
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /bookings/messages",
+      "method": "GET",
+      "path": "/bookings/messages",
+      "operationId": "",
+      "summary": "Get messages",
+      "description": "",
+      "tags": [
+        "Bookings"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "The message ID. Multiple ids can be included."
+        },
+        {
+          "name": "propertyId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "roomId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "bookingId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "masterId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "filter",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": ""
+        },
+        {
+          "name": "maxAge",
+          "location": "query",
+          "required": false,
+          "schemaType": "integer",
+          "description": "The maximum age (in days) of messages to return. If set to 3, messages from more than 3 days ago will not be included."
+        },
+        {
+          "name": "source",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "Returns only messages from one side of the conversation. E.g. if set to guest, only messages sent by a guest will be returned, messages sent by a host will be excluded."
+        },
+        {
+          "name": "page",
+          "location": "query",
+          "required": false,
+          "schemaType": "integer",
+          "description": "Get a page of items beyond the first"
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /channels/airbnb/listings",
+      "method": "GET",
+      "path": "/channels/airbnb/listings",
+      "operationId": "",
+      "summary": "Alpha - Get all Airbnb listings for a specified Airbnb user id",
+      "description": "Note: the response will include additional data from Airbnb's API that is not specified in the example.",
+      "tags": [
+        "Channels - Airbnb"
+      ],
+      "parameters": [
+        {
+          "name": "airbnbUserId",
+          "location": "query",
+          "required": true,
+          "schemaType": "string",
+          "description": ""
+        },
+        {
+          "name": "airbnbListingId",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "If the airbnbListingId is not specified then all listings will be returned. Must be included to see room data."
+        },
+        {
+          "name": "airbnbApiVersion",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": ""
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /channels/airbnb/reviews",
+      "method": "GET",
+      "path": "/channels/airbnb/reviews",
+      "operationId": "",
+      "summary": "Beta - Gets guest reviews from Airbnb",
+      "description": "Maxiumum of 100 reviews will be returned at once",
+      "tags": [
+        "Channels - Airbnb"
+      ],
+      "parameters": [
+        {
+          "name": "roomId",
+          "location": "query",
+          "required": true,
+          "schemaType": "integer",
+          "description": ""
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /channels/airbnb/users",
+      "method": "GET",
+      "path": "/channels/airbnb/users",
+      "operationId": "",
+      "summary": "Beta - Get all Airbnb user ids connected to an account",
+      "description": "",
+      "tags": [
+        "Channels - Airbnb"
+      ],
+      "parameters": [],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /channels/booking/reviews",
+      "method": "GET",
+      "path": "/channels/booking/reviews",
+      "operationId": "",
+      "summary": "Alpha - Gets reviews from Booking.com",
+      "description": "Maxiumum of 100 reviews will be returned at once",
+      "tags": [
+        "Channels - Booking.com"
+      ],
+      "parameters": [
+        {
+          "name": "propertyId",
+          "location": "query",
+          "required": true,
+          "schemaType": "integer",
+          "description": ""
+        },
+        {
+          "name": "from",
+          "location": "query",
+          "required": true,
+          "schemaType": "string",
+          "description": "Gets reviews made on or after this date. YYYY-MM-DD"
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /channels/settings",
+      "method": "GET",
+      "path": "/channels/settings",
+      "operationId": "",
+      "summary": "Alpha - Get channel settings",
+      "description": "",
+      "tags": [
+        "Channels - settings"
+      ],
+      "parameters": [
+        {
+          "name": "propertyId",
+          "location": "query",
+          "required": true,
+          "schemaType": "string",
+          "description": ""
+        },
+        {
+          "name": "roomId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "channel",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /channels/stripe/charges",
+      "method": "GET",
+      "path": "/channels/stripe/charges",
+      "operationId": "",
+      "summary": "Alpha",
+      "description": "Note: the response will include additional data from Stripe's API that is not specified in the example.",
+      "tags": [
+        "Channels - Stripe"
+      ],
+      "parameters": [
+        {
+          "name": "bookingId",
+          "location": "query",
+          "required": true,
+          "schemaType": "integer",
+          "description": ""
+        },
+        {
+          "name": "stripeChargeId",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "If not specified all charges will be returned"
+        },
+        {
+          "name": "stripeApiVersion",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": ""
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /channels/stripe/paymentMethods",
+      "method": "GET",
+      "path": "/channels/stripe/paymentMethods",
+      "operationId": "",
+      "summary": "Alpha",
+      "description": "Note: the response will include additional data from Stripe's API that is not specified in the example.",
+      "tags": [
+        "Channels - Stripe"
+      ],
+      "parameters": [
+        {
+          "name": "bookingId",
+          "location": "query",
+          "required": true,
+          "schemaType": "integer",
+          "description": ""
+        },
+        {
+          "name": "stripePaymentMethodId",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": ""
+        },
+        {
+          "name": "stripeApiVersion",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": ""
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /inventory/fixedPrices",
+      "method": "GET",
+      "path": "/inventory/fixedPrices",
+      "operationId": "",
+      "summary": "Gets fixed prices",
+      "description": "Note: fixed price linking is not yet supported",
+      "tags": [
+        "Inventory"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "The ID of the fixed price, multiple can be included"
+        },
+        {
+          "name": "roomId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "Multiple roomIds can be included"
+        },
+        {
+          "name": "propertyId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "Multiple propertyIds can be included"
+        },
+        {
+          "name": "includeRateCodes",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "page",
+          "location": "query",
+          "required": false,
+          "schemaType": "integer",
+          "description": "Get a page of items beyond the first"
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /inventory/rooms/availability",
+      "method": "GET",
+      "path": "/inventory/rooms/availability",
+      "operationId": "",
+      "summary": "Get the availability status of dates",
+      "description": "",
+      "tags": [
+        "Inventory"
+      ],
+      "parameters": [
+        {
+          "name": "roomId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "propertyId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "startDate",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": ""
+        },
+        {
+          "name": "endDate",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "The last night to be booked (i.e. the day before check-out)"
+        },
+        {
+          "name": "page",
+          "location": "query",
+          "required": false,
+          "schemaType": "integer",
+          "description": "Get a page of items beyond the first"
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /inventory/rooms/calendar",
+      "method": "GET",
+      "path": "/inventory/rooms/calendar",
+      "operationId": "",
+      "summary": "Gets per day values from the calendar.",
+      "description": "Values that are set in other places, such as per room, are not returned here - only values that you can see in the calendar (there is an exception with minStay and maxStay, if these are not set in the calendar then the minimum/maximum restrictions from the room will be returned). By default no data will be returned. You should include at least one includeX parameter.",
+      "tags": [
+        "Inventory"
+      ],
+      "parameters": [
+        {
+          "name": "startDate",
+          "location": "query",
+          "required": true,
+          "schemaType": "string",
+          "description": ""
+        },
+        {
+          "name": "endDate",
+          "location": "query",
+          "required": true,
+          "schemaType": "string",
+          "description": ""
+        },
+        {
+          "name": "roomId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "Multiple roomIds can be included"
+        },
+        {
+          "name": "propertyId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "Multiple propertyIds can be included"
+        },
+        {
+          "name": "includeNumAvail",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": "Include the numAvail field in the response"
+        },
+        {
+          "name": "includeMinStay",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": "Include the minStay field in the response"
+        },
+        {
+          "name": "includeMaxStay",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": "Include the maxStay field in the response"
+        },
+        {
+          "name": "includeMultiplier",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": "Include the multiplier field in the response"
+        },
+        {
+          "name": "includeOverride",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": "Include the override fields in the response"
+        },
+        {
+          "name": "includePrices",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": "Include the price fields in the response"
+        },
+        {
+          "name": "includeLinkedPrices",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": "Include the linkedPrice fields in the response"
+        },
+        {
+          "name": "includeChannels",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": "Includes channel specific information in the response"
+        },
+        {
+          "name": "page",
+          "location": "query",
+          "required": false,
+          "schemaType": "integer",
+          "description": "Get a page of items beyond the first"
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /inventory/rooms/offers",
+      "method": "GET",
+      "path": "/inventory/rooms/offers",
+      "operationId": "",
+      "summary": "Get offer based on specified criteria",
+      "description": "",
+      "tags": [
+        "Inventory"
+      ],
+      "parameters": [
+        {
+          "name": "propertyId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "roomId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "offerId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "arrival",
+          "location": "query",
+          "required": true,
+          "schemaType": "string",
+          "description": ""
+        },
+        {
+          "name": "departure",
+          "location": "query",
+          "required": true,
+          "schemaType": "string",
+          "description": ""
+        },
+        {
+          "name": "numAdults",
+          "location": "query",
+          "required": true,
+          "schemaType": "integer",
+          "description": ""
+        },
+        {
+          "name": "numChildren",
+          "location": "query",
+          "required": false,
+          "schemaType": "integer",
+          "description": ""
+        },
+        {
+          "name": "includeTexts",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "includes descriptive texts in response for specified language. Use 2 character country code: ```?includeTexts=en```"
+        },
+        {
+          "name": "agentCode",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": ""
+        },
+        {
+          "name": "page",
+          "location": "query",
+          "required": false,
+          "schemaType": "integer",
+          "description": "Get a page of items beyond the first"
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /inventory/rooms/unitBookings",
+      "method": "GET",
+      "path": "/inventory/rooms/unitBookings",
+      "operationId": "",
+      "summary": "Beta - Get information about which dates units have bookings",
+      "description": "",
+      "tags": [
+        "Inventory"
+      ],
+      "parameters": [
+        {
+          "name": "roomId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "propertyId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "startDate",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": ""
+        },
+        {
+          "name": "endDate",
+          "location": "query",
+          "required": false,
+          "schemaType": "string",
+          "description": "The last night to be booked (i.e. the day before check-out)"
+        },
+        {
+          "name": "page",
+          "location": "query",
+          "required": false,
+          "schemaType": "integer",
+          "description": "Get a page of items beyond the first"
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /organizations/users",
+      "method": "GET",
+      "path": "/organizations/users",
+      "operationId": "",
+      "summary": "Coming soon",
+      "description": "",
+      "tags": [
+        "Organizations"
+      ],
+      "parameters": [],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /properties",
+      "method": "GET",
+      "path": "/properties",
+      "operationId": "",
+      "summary": "Beta - Get properties matching specified criteria",
+      "description": "",
+      "tags": [
+        "Properties"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "The property ID. Multiple ids can be included."
+        },
+        {
+          "name": "includeLanguages",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "includeTexts",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "includePictures",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "includeOffers",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "includePriceRules",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "includeUpsellItems",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "includeAllRooms",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "includeUnitDetails",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": "By default only unit names are returned."
+        },
+        {
+          "name": "roomId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "page",
+          "location": "query",
+          "required": false,
+          "schemaType": "integer",
+          "description": "Get a page of items beyond the first"
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "GET /properties/rooms",
+      "method": "GET",
+      "path": "/properties/rooms",
+      "operationId": "",
+      "summary": "Coming soon - Get rooms matching specified criteria",
+      "description": "",
+      "tags": [
+        "Properties"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "The room ID. Multiple ids can be included."
+        },
+        {
+          "name": "propertyId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": "Gets all rooms for the specified property. Multiples ids can be included."
+        },
+        {
+          "name": "includeLanguages",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "includeTexts",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "includePictures",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "includeOffers",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "includePriceRules",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "includeUpsellItems",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": ""
+        },
+        {
+          "name": "includeUnitDetails",
+          "location": "query",
+          "required": false,
+          "schemaType": "boolean",
+          "description": "By default only unit names are returned."
+        },
+        {
+          "name": "page",
+          "location": "query",
+          "required": false,
+          "schemaType": "integer",
+          "description": "Get a page of items beyond the first"
+        }
+      ],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [
+        "count",
+        "data",
+        "pages",
+        "success",
+        "type"
+      ],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "PATCH /bookings/messages",
+      "method": "PATCH",
+      "path": "/bookings/messages",
+      "operationId": "",
+      "summary": "Make changes in all messages in a selection.",
+      "description": "",
+      "tags": [
+        "Bookings"
+      ],
+      "parameters": [
+        {
+          "name": "messageId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "propertyId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "roomId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "bookingId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        },
+        {
+          "name": "masterId",
+          "location": "query",
+          "required": false,
+          "schemaType": "array",
+          "description": ""
+        }
+      ],
+      "requestFields": [
+        "read"
+      ],
+      "requestSchemaRef": null,
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "POST /accounts",
+      "method": "POST",
+      "path": "/accounts",
+      "operationId": "",
+      "summary": "Alpha - Create or modify accounts",
+      "description": "",
+      "tags": [
+        "Accounts"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "balance",
+        "channelCollectInvoice",
+        "charge",
+        "controlCss",
+        "controlLanguage",
+        "controlMenu",
+        "controlText",
+        "dateFormat",
+        "decimalPlaces",
+        "deduceLanguage",
+        "exportData",
+        "hidePages",
+        "hideSettings",
+        "id",
+        "oneTimeVouchers",
+        "readonlyPages",
+        "subAccounts",
+        "subControlCss",
+        "subControlText",
+        "subHidePages",
+        "subHideSettings",
+        "subReadonlyPages",
+        "template1",
+        "template2",
+        "template3",
+        "template4",
+        "template5",
+        "template6",
+        "template7",
+        "template8",
+        "timezone",
+        "unitStatusValues",
+        "usage",
+        "windowStyle"
+      ],
+      "requestSchemaRef": "account",
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "POST /bookings",
+      "method": "POST",
+      "path": "/bookings",
+      "operationId": "",
+      "summary": "Create or update bookings",
+      "description": "To add a new info item to a booking, include it without an info item id\nTo modify an info item, include the info item id with the code and/or text fields\nTo delete an info item, include only the info item id\n",
+      "tags": [
+        "Bookings"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "actions",
+        "address",
+        "apiMessage",
+        "arrival",
+        "arrivalTime",
+        "city",
+        "comments",
+        "commission",
+        "company",
+        "country",
+        "country2",
+        "custom1",
+        "custom10",
+        "custom2",
+        "custom3",
+        "custom4",
+        "custom5",
+        "custom6",
+        "custom7",
+        "custom8",
+        "custom9",
+        "departure",
+        "deposit",
+        "email",
+        "fax",
+        "firstName",
+        "flagColor",
+        "flagText",
+        "groupNote",
+        "id",
+        "infoItems",
+        "invoiceItems",
+        "invoiceeId",
+        "lang",
+        "lastName",
+        "masterId",
+        "message",
+        "mobile",
+        "notes",
+        "numAdult",
+        "numChild",
+        "pcibookingToken",
+        "phone",
+        "postcode",
+        "price",
+        "rateDescription",
+        "refererEditable",
+        "roomId",
+        "roomQty",
+        "state",
+        "status",
+        "stripeToken",
+        "tax",
+        "title",
+        "unitId",
+        "voucher"
+      ],
+      "requestSchemaRef": null,
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "POST /bookings/messages",
+      "method": "POST",
+      "path": "/bookings/messages",
+      "operationId": "",
+      "summary": "Send messages or mark them as read",
+      "description": "",
+      "tags": [
+        "Bookings"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "attachment",
+        "attachmentMimeType",
+        "attachmentName",
+        "bookingId",
+        "id",
+        "message",
+        "read",
+        "source"
+      ],
+      "requestSchemaRef": "hostMessage",
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "POST /channels/airbnb",
+      "method": "POST",
+      "path": "/channels/airbnb",
+      "operationId": "",
+      "summary": "Alpha - Perform actions at Airbnb",
+      "description": "",
+      "tags": [
+        "Channels - Airbnb"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "action",
+        "airbnbListingId",
+        "airbnbUserId",
+        "connect",
+        "importBlockedDates",
+        "importBookings",
+        "propertyId",
+        "roomId"
+      ],
+      "requestSchemaRef": null,
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "POST /channels/booking",
+      "method": "POST",
+      "path": "/channels/booking",
+      "operationId": "",
+      "summary": "Alpha - Perform actions at Booking.com",
+      "description": "",
+      "tags": [
+        "Channels - Booking.com"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "action",
+        "bookingId"
+      ],
+      "requestSchemaRef": null,
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "POST /channels/settings",
+      "method": "POST",
+      "path": "/channels/settings",
+      "operationId": "",
+      "summary": "Alpha - Set channel settings",
+      "description": "",
+      "tags": [
+        "Channels - settings"
+      ],
+      "parameters": [],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "POST /channels/stripe",
+      "method": "POST",
+      "path": "/channels/stripe",
+      "operationId": "",
+      "summary": "Alpha - Perform actions at Stripe",
+      "description": "",
+      "tags": [
+        "Channels - Stripe"
+      ],
+      "parameters": [],
+      "requestFields": [],
+      "requestSchemaRef": null,
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "POST /inventory/fixedPrices",
+      "method": "POST",
+      "path": "/inventory/fixedPrices",
+      "operationId": "",
+      "summary": "Create or modify fixed prices",
+      "description": "For fixed prices only, daily prices can be set in /inventory/rooms/calendar\n\nTo create a new fixed price, do not include the id field.\n\nNote that there is a maximum of 100 fixed prices per room.\n",
+      "tags": [
+        "Inventory"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "1PersonPrice",
+        "1PersonPriceEnable",
+        "2PersonPrice",
+        "2PersonPriceEnable",
+        "agentCodes",
+        "allowAloneChildren",
+        "allowEnquiry",
+        "allowMultiplier",
+        "allowedDays",
+        "bookingPage",
+        "bookingType",
+        "channelManagement",
+        "channels",
+        "checkInDays",
+        "checkOutDays",
+        "color",
+        "discounts",
+        "exportPrice",
+        "extraChildPrice",
+        "extraChildPriceEnable",
+        "extraPersonPrice",
+        "extraPersonPriceEnable",
+        "firstNight",
+        "id",
+        "lastNight",
+        "maxAdvance",
+        "maxNights",
+        "minAdvance",
+        "minNights",
+        "name",
+        "offerId",
+        "pricesPerNights",
+        "propertyId",
+        "refererDiscounts",
+        "restrictionStrategy",
+        "roomId",
+        "roomPrice",
+        "roomPriceEnable",
+        "roomPriceGuests",
+        "strategy",
+        "upsellItems",
+        "voucherCodes"
+      ],
+      "requestSchemaRef": "fixedPrice",
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "POST /inventory/rooms/calendar",
+      "method": "POST",
+      "path": "/inventory/rooms/calendar",
+      "operationId": "",
+      "summary": "Modify per day calendar values.",
+      "description": "Values that are set in other places, such as per room, are not modified here - only values that you can see in the calendar.",
+      "tags": [
+        "Inventory"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "calendar",
+        "roomId"
+      ],
+      "requestSchemaRef": "calendar",
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "POST /properties",
+      "method": "POST",
+      "path": "/properties",
+      "operationId": "",
+      "summary": "Beta - Create or modify properties",
+      "description": "",
+      "tags": [
+        "Properties"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "account",
+        "address",
+        "bookingPageMultiplier",
+        "bookingQuestions",
+        "bookingRules",
+        "cardSettings",
+        "checkInEnd",
+        "checkInStart",
+        "checkOutEnd",
+        "city",
+        "contactFirstName",
+        "contactLastName",
+        "controlPriority",
+        "country",
+        "currency",
+        "discountVouchers",
+        "email",
+        "fax",
+        "featureCodes",
+        "groupKeywords",
+        "id",
+        "latitude",
+        "longitude",
+        "mobile",
+        "name",
+        "offerType",
+        "offers",
+        "oneTimeVouchers",
+        "paymentCollection",
+        "paymentGateways",
+        "permit",
+        "phone",
+        "postcode",
+        "propertyType",
+        "roomChargeDisplay",
+        "roomTypes",
+        "sellPriority",
+        "state",
+        "templates",
+        "texts",
+        "upsellItems",
+        "web",
+        "webhooks"
+      ],
+      "requestSchemaRef": "property",
+      "responseFields": [],
+      "responseSchemaRef": null
+    },
+    {
+      "operation": "POST Webhooks - bookings",
+      "method": "POST",
+      "path": "Webhooks - bookings",
+      "operationId": "",
+      "summary": "Alpha - The webhook payload sent to your URL",
+      "description": "Configure under Settings -> Properties -> Access -> Booking Webhook",
+      "tags": [
+        "Webhooks"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "booking",
+        "infoItems",
+        "invoiceItems",
+        "messages",
+        "retries",
+        "timeStamp"
+      ],
+      "requestSchemaRef": null,
+      "responseFields": [],
+      "responseSchemaRef": null
+    }
+  ]
+}

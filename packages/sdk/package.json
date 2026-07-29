@@ -1,0 +1,37 @@
+{
+  "name": "beds24-sdk",
+  "version": "1.1.5",
+  "description": "Typed wrapper over the Beds24 V2 JSON API — HTTP client, OpenAPI schema validation, and typed domain workflows (bookings, pricing, availability, channels, webhooks).",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./ops": "./src/ops/index.ts",
+    "./validate": "./src/validate.ts",
+    "./schema": "./src/schema.ts",
+    "./types": "./src/generated/types.d.ts",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "apiV2.yaml"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "js-yaml": "^4.1.0",
+    "openapi-fetch": "^0.17.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "typescript": "^5.7.0"
+  }
+}
