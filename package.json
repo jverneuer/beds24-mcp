@@ -1,0 +1,33 @@
+{
+  "name": "beds24-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for the Beds24 API — semantic search over cited docs + YAML schema validation. Source of truth: the markdown facts in ./ and apiV2.yaml.",
+  "type": "module",
+  "bin": {
+    "beds24-mcp": "src/cli.ts"
+  },
+  "scripts": {
+    "dev": "bun run src/server.ts",
+    "serve": "bun run src/server.ts",
+    "index": "bun run src/cli.ts index",
+    "reindex": "bun run src/cli.ts index --force",
+    "status": "bun run src/cli.ts status",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.5.0",
+    "@libsql/client": "^0.14.0",
+    "@modelcontextprotocol/sdk": "^1.10.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "js-yaml": "^4.1.0",
+    "sqlite-vec": "^0.1.7"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.0",
+    "bun-types": "^1.2.0",
+    "typescript": "^5.7.0"
+  }
+}
