@@ -1,16 +1,13 @@
-# Publish a new release to npm AND GitHub Packages.
+# Publish a new release to npm.
 #
 # Trigger: push a semver tag, e.g. `git tag v0.1.0 && git push origin v0.1.0`.
-# The job builds, typechecks, and publishes `@jverneuer/beds24-mcp-server` to
-# both the npm registry and GitHub Packages (so it shows up on the repo page).
+# The job builds, typechecks, and publishes `beds24-mcp-server` to the npm registry.
 #
 # Required secret:
 #   NPM_TOKEN — an npm access token (Automation type recommended, so it works
 #               with 2FA enabled on your npm account).
 #   Create it at https://npmjs.com → Access Tokens → Generate New Token (Automation),
 #   then add it to this repo at Settings → Secrets → Actions → New repository secret.
-#
-# GitHub Packages uses the automatic GITHUB_TOKEN — no extra secret needed.
 
 name: Publish to npm
 
@@ -21,7 +18,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   publish:
@@ -56,10 +52,3 @@ jobs:
         run: npm publish --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish to GitHub Packages
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-          npm publish --registry=https://npm.pkg.github.com
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
