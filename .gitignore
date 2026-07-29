@@ -10,5 +10,9 @@ node_modules/
 # OS
 .DS_Store
 
+# IDE / tooling caches
+.cachebro/
+.cursor/
+
 # Local model cache is fine to keep, but ignore if huge
 # .cache/
