@@ -1,28 +1,50 @@
 {
-  "name": "beds24-mcp",
+  "name": "beds24-mcp-server",
   "version": "0.1.0",
-  "description": "MCP server for the Beds24 API — semantic search over cited docs + YAML schema validation. Source of truth: the markdown facts in ./ and apiV2.yaml.",
+  "description": "MCP server + CLI + SDK for the Beds24 API — semantic search over cited docs, YAML schema validation, and a dependency-free TS SDK.",
   "type": "module",
   "bin": {
-    "beds24-mcp": "src/cli.ts"
+    "beds24-mcp-server": "dist/cli.mjs"
+  },
+  "main": "dist/sdk/index.js",
+  "exports": {
+    ".": "./dist/sdk/index.js",
+    "./search": "./dist/sdk/search.js",
+    "./validate": "./dist/sdk/validate.js",
+    "./schema": "./dist/sdk/schema.js",
+    "./indexer": "./dist/sdk/indexer.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "knowledge",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
   },
   "scripts": {
     "dev": "bun run src/server.ts",
-    "serve": "bun run src/server.ts",
+    "serve": "bun run src/cli.ts serve",
     "index": "bun run src/cli.ts index",
     "reindex": "bun run src/cli.ts index --force",
     "status": "bun run src/cli.ts status",
+    "setup": "bun run src/cli.ts setup",
     "typecheck": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test",
+    "build": "bun build src/cli.ts --target node --packages=external --outfile dist/cli.mjs --banner '#!/usr/bin/env node' && chmod +x dist/cli.mjs && bun build src/sdk/index.ts src/sdk/search.ts src/sdk/validate.ts src/sdk/schema.ts src/sdk/indexer.ts --target node --packages=external --outdir dist/sdk --sourcemap",
+    "prepublishOnly": "bun run typecheck && bun run build"
   },
   "dependencies": {
     "@huggingface/transformers": "^3.5.0",
-    "@libsql/client": "^0.14.0",
     "@modelcontextprotocol/sdk": "^1.10.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "js-yaml": "^4.1.0",
-    "sqlite-vec": "^0.1.7"
+    "libsql": "^0.4.0",
+    "sqlite-vec": "^0.1.7",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
@@ -30,7 +52,5 @@
     "bun-types": "^1.2.0",
     "typescript": "^5.7.0",
     "@types/bun": "latest"
-  },
-  "module": "index.ts",
-  "private": true
+  }
 }

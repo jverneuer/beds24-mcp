@@ -1,6 +1,6 @@
-# beds24-mcp
+# beds24-mcp-server
 
-MCP server for the Beds24 API. Two complementary layers over the same source of truth:
+MCP server + CLI + SDK for the Beds24 API. Two complementary layers over the same source of truth:
 
 1. **Semantic search** — vector index over the cited markdown docs (`beds24-search`). Answers *"how does pricing propagate?"*, *"what are channel source IDs?"*.
 2. **Schema validation** — resolves `apiV2.yaml` and validates draft payloads (`beds24-validate`). Answers *"what's wrong with my POST /bookings payload?"*.
@@ -9,9 +9,34 @@ The markdown facts in `knowledge/` + `knowledge/apiV2.yaml` are the **source of 
 
 ## Install
 
+### Global (recommended — harness-available everywhere)
+
+```bash
+npm install -g beds24-mcp-server
+```
+
+This publishes the `beds24-mcp-server` command. Then auto-configure your harness(es):
+
+```bash
+beds24-mcp-server setup        # detects Claude Code / Cursor / Windsurf / VS Code, writes their MCP config
+```
+
+That's it — `setup` writes the config, runs `bun install` (if needed), and builds the vector index. Restart your harness; the tools appear.
+
+Run `beds24-mcp-server setup --dry-run` to preview the writes without touching anything, or `--harness claude --harness cursor` to pick specific ones. Use `--skip-index` if you want to build the index later.
+
+### Local / from source
+
 ```bash
 bun install
-bun run index     # build the vector index from knowledge/*.md (one-time, ~30s)
+bun run index      # build the vector index from knowledge/*.md (one-time, ~30s)
+# or let it auto-index on first server start
+```
+
+To configure harnesses from a source checkout:
+
+```bash
+bun run setup      # same detection + config writing as the global command
 ```
 
 ## Using the SDK from another repo
@@ -30,9 +55,18 @@ This lets you run schema validation from a dagster asset, an inngest function, o
 
 ## Configure (your harness)
 
-All harnesses speak the same MCP JSON shape; only the **config file location** differs. Replace `/ABSOLUTE/PATH/to/beds24-mcp` with where you cloned the repo.
+All harnesses speak the same MCP JSON shape; only the **config file location** differs.
 
-The shared block (paste into `command` / `args` below):
+The shared block (paste into `command` / `args` below). **Prefer the global command** if you installed via npm — it survives reinstalls and doesn't hard-code a checkout path:
+
+```json
+{
+  "command": "beds24-mcp-server",
+  "args": ["serve"]
+}
+```
+
+Falling back to a source checkout (replaces `/ABSOLUTE/PATH/to/beds24-mcp`):
 
 ```json
 {
@@ -40,6 +74,8 @@ The shared block (paste into `command` / `args` below):
   "args": ["run", "/ABSOLUTE/PATH/to/beds24-mcp/src/server.ts"]
 }
 ```
+
+> Run `beds24-mcp-server setup` (or `bun run setup`) to write these files automatically — no hand-editing needed.
 
 ### Claude Code
 

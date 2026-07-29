@@ -9,6 +9,19 @@
 import { countChunks, dbExists, getDb, DB_PATH } from "./sdk/db.ts";
 import { buildIndex } from "./sdk/indexer.ts";
 import { listEndpoints } from "./sdk/schema.ts";
+import { startServer } from "./server.ts";
+import { runSetup } from "./setup.ts";
+
+/** Collect repeated flag values, e.g. `--harness a --harness b` → `["a","b"]`. */
+export function collectFlags(args: string[], flag: string): string[] {
+	const out: string[] = [];
+	for (let i = 0; i < args.length; i++) {
+		if (args[i] === flag && i + 1 < args.length) {
+			out.push(args[i + 1] ?? "");
+		}
+	}
+	return out;
+}
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -86,8 +99,29 @@ async function main(): Promise<void> {
 		return;
 	}
 
+	if (command === "serve") {
+		// Start the MCP server (same as `bun run src/server.ts`).
+		await startServer();
+		return;
+	}
+
+	if (command === "setup") {
+		const harnessArgs = args.slice(1);
+		const requested = collectFlags(harnessArgs, "--harness");
+		await runSetup({
+			harnesses: requested.length > 0 ? requested : undefined,
+			all: harnessArgs.includes("--all"),
+			dryRun: harnessArgs.includes("--dry-run"),
+			skipInstall: harnessArgs.includes("--skip-install"),
+			skipIndex: harnessArgs.includes("--skip-index"),
+		});
+		return;
+	}
+
 	console.error(`Unknown command: ${command}`);
-	console.error("Usage: bun run src/cli.ts index [--force] | status");
+	console.error(
+		"Usage: beds24-mcp index [--force] | status | serve | setup [--harness <name>] [--all] [--dry-run]",
+	);
 	process.exit(1);
 }
 

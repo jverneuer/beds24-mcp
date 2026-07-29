@@ -10,8 +10,10 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { z } from "zod";
+
+import { defaultKnowledgeDir } from "./sdk/paths.ts";
 
 import { dbExists, getDb } from "./sdk/db.ts";
 import { buildIndex } from "./sdk/indexer.ts";
@@ -19,9 +21,9 @@ import { search } from "./sdk/search.ts";
 import { getSchema, listEndpoints, flattenObject, type Field } from "./sdk/schema.ts";
 import { Beds24Validator } from "./sdk/validate.ts";
 
-/** Resolve the knowledge root relative to this file (repo root / knowledge). */
+/** Resolve the knowledge root relative to the package (repo root / knowledge). */
 function defaultFactsDir(): string {
-	return resolve(join(import.meta.dir, "..", "knowledge"));
+	return defaultKnowledgeDir();
 }
 
 const FACTS_DIR = process.env.BEDS24_FACTS_DIR ?? defaultFactsDir();
@@ -289,7 +291,8 @@ server.registerResource(
 // Boot
 // ---------------------------------------------------------------------------
 
-async function main(): Promise<void> {
+/** Build the index (if missing) then connect the MCP server on stdio. */
+export async function startServer(): Promise<void> {
 	// Auto-build the index on startup if it's missing. Log to stderr so we
 	// never corrupt the stdio JSON-RPC stream.
 	if (!dbExists()) {
@@ -308,7 +311,10 @@ async function main(): Promise<void> {
 	console.error("[beds24] MCP server connected on stdio.");
 }
 
-main().catch((err) => {
-	console.error("[beds24] fatal:", err);
-	process.exit(1);
-});
+// Run directly (`bun run src/server.ts`) — not when imported by the CLI.
+if (import.meta.main) {
+	startServer().catch((err) => {
+		console.error("[beds24] fatal:", err);
+		process.exit(1);
+	});
+}

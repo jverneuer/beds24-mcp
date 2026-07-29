@@ -10,11 +10,20 @@
 
 import Database from "libsql";
 import { mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { load } from "sqlite-vec";
 
-/** On-disk location of the regenerable vector index (see .gitignore). */
-export const DB_PATH = ".beds24/index.db";
+import { packageRoot } from "./paths.ts";
+
+/**
+ * On-disk location of the regenerable vector index (see .gitignore).
+ *
+ * Resolved relative to the package root (not cwd) so a global `npm install -g`
+ * keeps its index self-contained next to `knowledge/`, instead of scattering a
+ * `.beds24/` folder into whatever project the user happens to be in. Override
+ * with BEDS24_DB_PATH.
+ */
+export const DB_PATH = process.env.BEDS24_DB_PATH ?? join(packageRoot(), ".beds24", "index.db");
 
 /** Embedding dimensionality — fixed by Xenova/all-MiniLM-L6-v2. */
 export const EMBED_DIM = 384;
