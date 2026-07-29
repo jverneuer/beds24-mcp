@@ -28,22 +28,96 @@ const result = await validator.validate("POST /bookings", "request", payload);
 
 This lets you run schema validation from a dagster asset, an inngest function, or a CLI — no MCP server needed.
 
-## Configure (Claude Code)
+## Configure (your harness)
 
-Add to your project or user `.mcp.json`:
+All harnesses speak the same MCP JSON shape; only the **config file location** differs. Replace `/ABSOLUTE/PATH/to/beds24-mcp` with where you cloned the repo.
+
+The shared block (paste into `command` / `args` below):
+
+```json
+{
+  "command": "bun",
+  "args": ["run", "/ABSOLUTE/PATH/to/beds24-mcp/src/server.ts"]
+}
+```
+
+### Claude Code
+
+Project-level `.mcp.json` (committed, shared with the team) **or** user-level `~/.claude/.mcp.json` (just you):
 
 ```json
 {
   "mcpServers": {
     "beds24": {
       "command": "bun",
-      "args": ["run", "/Users/matte/projects/beds24-mcp/src/server.ts"]
+      "args": ["run", "/ABSOLUTE/PATH/to/beds24-mcp/src/server.ts"]
     }
   }
 }
 ```
 
-Restart Claude Code. The tools appear in every session.
+Restart Claude Code. Tools appear in every session.
+
+### Cursor
+
+Global `~/.cursor/mcp.json` (all projects) or project `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "beds24": {
+      "command": "bun",
+      "args": ["run", "/ABSOLUTE/PATH/to/beds24-mcp/src/server.ts"]
+    }
+  }
+}
+```
+
+Open **Cursor Settings → MCP**; the server should show green. If not, click **Restart all servers** (it must resolve `bun` on your `$PATH` — launch Cursor from a shell or add the bun path to the config's `env`).
+
+### Windsurf
+
+`~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "beds24": {
+      "command": "bun",
+      "args": ["run", "/ABSOLUTE/PATH/to/beds24-mcp/src/server.ts"]
+    }
+  }
+}
+```
+
+Reload the window / restart Windsurf to pick it up.
+
+### VS Code (Copilot)
+
+Project-level `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "beds24": {
+      "command": "bun",
+      "args": ["run", "/ABSOLUTE/PATH/to/beds24-mcp/src/server.ts"]
+    }
+  }
+}
+```
+
+> Note: VS Code uses `servers` (not `mcpServers`). Restart VS Code after editing.
+
+### Any other harness (OpenCode, goose, …)
+
+The shape is the same — look in your harness's settings for "MCP servers" and register a server named `beds24` with the `command` / `args` block above.
+
+### Troubleshooting
+
+- **"bun not found"** — the harness doesn't inherit your shell `$PATH`. Launch it from a terminal, or add the bun dir to the server's `env` (e.g. `"env": { "PATH": "/Users/you/.bun/bin:/usr/bin:/bin" }`).
+- **No tools after restart** — the server auto-indexes on first run and logs to stderr. Open the harness's MCP/output panel and look for `[beds24] MCP server connected on stdio.`. If it shows an error, re-run `bun install && bun run index` in the repo.
+- **Stale facts** — after updating `knowledge/`, run `bun run index` (or just delete `.beds24/` and restart; it rebuilds).
 
 ## Tools
 
