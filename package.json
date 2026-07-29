@@ -1,7 +1,27 @@
 {
   "name": "beds24-mcp-server",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "MCP server + CLI + SDK for the Beds24 API — semantic search over cited docs, YAML schema validation, and a dependency-free TS SDK.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jverneuer/beds24-mcp.git"
+  },
+  "homepage": "https://github.com/jverneuer/beds24-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/jverneuer/beds24-mcp/issues"
+  },
+  "keywords": [
+    "beds24",
+    "mcp",
+    "mcp-server",
+    "llm",
+    "ai",
+    "sdk",
+    "openapi",
+    "schema-validation",
+    "semantic-search",
+    "vector-index"
+  ],
   "type": "module",
   "bin": {
     "beds24-mcp-server": "dist/cli.mjs"
