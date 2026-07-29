@@ -7,6 +7,7 @@
  * locate `knowledge/` and `.beds24/` relative to itself regardless of runtime.
  */
 
+import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -34,13 +35,8 @@ export function moduleDir(): string {
 export function packageRoot(): string {
 	let dir = moduleDir();
 	for (let i = 0; i < 8; i++) {
-		try {
-			const fs = require("node:fs") as typeof import("node:fs");
-			if (fs.existsSync(join(dir, "package.json")) && fs.existsSync(join(dir, "knowledge"))) {
-				return dir;
-			}
-		} catch {
-			/* keep walking */
+		if (existsSync(join(dir, "package.json")) && existsSync(join(dir, "knowledge"))) {
+			return dir;
 		}
 		const parent = dirname(dir);
 		if (parent === dir) break; // filesystem root

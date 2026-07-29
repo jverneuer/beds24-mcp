@@ -217,4 +217,19 @@ export class Beds24Validator {
 	}
 }
 
+/**
+ * Standalone request validation — used by the API client to check a request
+ * body against the endpoint schema *before* sending it (fail fast, save a
+ * credit). Same logic as `Beds24Validator.validate`, but stateless: pass the
+ * factsDir each call. Returns `{ valid: true }` or `{ valid, errors }`.
+ */
+export function validateRequest(
+	factsDir: string,
+	endpoint: string,
+	direction: "request",
+	payload: unknown,
+): ValidationResult {
+	return Beds24Validator.create({ factsDir }).validate(endpoint, direction, payload);
+}
+
 export type { Field };

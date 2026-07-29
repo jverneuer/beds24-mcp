@@ -1,0 +1,54 @@
+# Publish a new release to npm.
+#
+# Trigger: push a semver tag, e.g. `git tag v0.1.0 && git push origin v0.1.0`.
+# The job builds, typechecks, and publishes `beds24-mcp-server` to the npm registry.
+#
+# Required secret:
+#   NPM_TOKEN — an npm access token (Automation type recommended, so it works
+#               with 2FA enabled on your npm account).
+#   Create it at https://npmjs.com → Access Tokens → Generate New Token (Automation),
+#   then add it to this repo at Settings → Secrets → Actions → New repository secret.
+
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Build (CLI + SDK bundles)
+        run: bun run build
+
+      - name: Verify bundles load
+        run: node dist/cli.mjs status
+
+      - name: Configure npm auth
+        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

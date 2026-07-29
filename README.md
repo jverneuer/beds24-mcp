@@ -44,14 +44,31 @@ bun run setup      # same detection + config writing as the global command
 The SDK has no MCP dependency — just point it at the facts + yaml:
 
 ```ts
-import { Beds24Validator, Beds24Search } from "beds24-mcp/sdk";
+import { Beds24Validator, Beds24Search } from "beds24-mcp-server/sdk";
 
-const validator = await Beds24Validator.create({ factsDir: "path/to/knowledge" });
+const validator = Beds24Validator.create({ factsDir: "path/to/knowledge" });
 const result = await validator.validate("POST /bookings", "request", payload);
 // result.valid, result.errors — feed errors back to your LLM to fix the call
 ```
 
 This lets you run schema validation from a dagster asset, an inngest function, or a CLI — no MCP server needed.
+
+## Using the client
+
+A dependency-free HTTP client (global `fetch`, Node 18+) with 24h-token auth, automatic token refresh on 401, request validation, and credit-limit tracking:
+
+```ts
+import { Beds24Client } from "beds24-mcp-server/client";
+
+const client = new Beds24Client({ apiKey: "...", propKey: "..." });
+const { data, credits } = await client.request("GET /bookings", {
+	arrival: "2026-08-01",
+	departure: "2026-08-05",
+});
+// credits.remaining / credits.resetsIn — the 5-minute rate-limit window
+```
+
+Every `METHOD /path` in `apiV2.yaml` is reachable via `client.request(key, body)`. Request bodies are validated against the schema before sending (fail fast, save a credit). Throws `Beds24Error` with `status`, `code`, `retryable`, and `creditsRemaining`.
 
 ## Configure (your harness)
 
@@ -183,7 +200,7 @@ The shape is the same — look in your harness's settings for "MCP servers" and 
 │   │   ├── schema.ts      # parse apiV2.yaml → resolve $ref/allOf/oneOf
 │   │   └── validate.ts    # draft payload → structured LLM-friendly errors
 │   ├── server.ts          # thin MCP wrapper over the SDK (MCP deps only here)
-│   └── cli.ts             # thin CLI wrapper over the SDK (`beds24-mcp index|status`)
+│   └── cli.ts             # thin CLI wrapper over the SDK (`beds24-mcp-server index|status`)
 ├── .beds24/               # generated vector index (gitignored)
 └── package.json
 ```

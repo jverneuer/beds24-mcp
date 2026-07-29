@@ -1,6 +1,6 @@
 {
   "name": "beds24-mcp-server",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "MCP server + CLI + SDK for the Beds24 API — semantic search over cited docs, YAML schema validation, and a dependency-free TS SDK.",
   "type": "module",
   "bin": {
@@ -9,6 +9,9 @@
   "main": "dist/sdk/index.js",
   "exports": {
     ".": "./dist/sdk/index.js",
+    "./sdk": "./dist/sdk/index.js",
+    "./client": "./dist/sdk/client.js",
+    "./ops": "./dist/sdk/ops/index.js",
     "./search": "./dist/sdk/search.js",
     "./validate": "./dist/sdk/validate.js",
     "./schema": "./dist/sdk/schema.js",
@@ -22,7 +25,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=24.0.0"
   },
   "scripts": {
     "dev": "bun run src/server.ts",
@@ -33,7 +36,7 @@
     "setup": "bun run src/cli.ts setup",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "build": "bun build src/cli.ts --target node --packages=external --outfile dist/cli.mjs --banner '#!/usr/bin/env node' && chmod +x dist/cli.mjs && bun build src/sdk/index.ts src/sdk/search.ts src/sdk/validate.ts src/sdk/schema.ts src/sdk/indexer.ts --target node --packages=external --outdir dist/sdk --sourcemap",
+    "build": "bun build src/cli.ts --target node --packages=external --outfile dist/cli.mjs --banner '#!/usr/bin/env node' && chmod +x dist/cli.mjs && bun build src/sdk/index.ts src/sdk/beds24.ts src/sdk/client.ts src/sdk/ops/index.ts src/sdk/search.ts src/sdk/validate.ts src/sdk/schema.ts src/sdk/indexer.ts --target node --packages=external --outdir dist/sdk --sourcemap",
     "prepublishOnly": "bun run typecheck && bun run build"
   },
   "dependencies": {
