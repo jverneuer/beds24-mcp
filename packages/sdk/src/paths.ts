@@ -1,5 +1,5 @@
 /**
- * Path helpers for the `beds24-sdk` package.
+ * Path helpers for the `beds24-sdk-client` package.
  *
  * The SDK owns its API spec (`apiV2.yaml` in the sdk package root) and resolves
  * it relative to itself — it has NO knowledge of the knowledge/corpus package.

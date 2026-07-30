@@ -1,5 +1,5 @@
 /**
- * Public surface of the beds24-sdk package.
+ * Public surface of the beds24-sdk-client package.
  *
  * A typed V2 API wrapper: the HTTP client, request validation against the
  * package-owned OpenAPI spec, the domain ops that compose the client, and the

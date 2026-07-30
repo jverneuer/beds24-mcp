@@ -1,9 +1,9 @@
 /**
  * MCP server for the Beds24 API — a thin wrapper over the beds24-knowledge and
- * beds24-sdk workspace packages.
+ * beds24-sdk-client workspace packages.
  *
  * All reusable logic lives in those packages (zero MCP dependency): search and
- * indexing in beds24-knowledge, schema/validation in beds24-sdk. This file only
+ * indexing in beds24-knowledge, schema/validation in beds24-sdk-client. This file only
  * registers MCP tools/resources and forwards calls. The MCP SDK is the only
  * non-dev dependency here, which is what keeps the packages portable.
  *
@@ -38,7 +38,7 @@ import {
 	flattenObject,
 	Beds24Validator,
 	type Field,
-} from "beds24-sdk";
+} from "beds24-sdk-client";
 
 /**
  * Knowledge corpus root. The package does not currently export its path helper,

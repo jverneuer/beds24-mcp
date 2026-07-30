@@ -55,7 +55,7 @@
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "beds24-knowledge": "workspace:*",
-    "beds24-sdk": "workspace:*",
+    "beds24-sdk-client": "workspace:*",
     "js-yaml": "^4.1.0",
     "libsql": "^0.4.0",
     "openapi-fetch": "^0.17.0",

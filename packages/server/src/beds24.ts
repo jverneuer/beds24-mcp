@@ -14,7 +14,7 @@
  * This file is the composition root: it imports from the two workspace packages
  * and wires them into the facade. It contains no SDK/knowledge logic of its own.
  *
- *  - `beds24-sdk`        → client, ops, validator, schema introspection
+ *  - `beds24-sdk-client` → client, ops, validator, schema introspection
  *  - `beds24-knowledge`  → indexer + hybrid search over the cited docs
  */
 
@@ -37,7 +37,7 @@ import {
 	type Beds24Response,
 	type Field,
 	type ValidationResult,
-} from "beds24-sdk";
+} from "beds24-sdk-client";
 
 import {
 	search,

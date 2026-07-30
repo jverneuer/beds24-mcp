@@ -4,7 +4,7 @@
  *   bun run scripts/fetch-spec.ts            # fetch + diff; rewrite only if changed
  *   bun run scripts/fetch-spec.ts --force    # always rewrite the local copy
  *
- * The spec is owned by the `beds24-sdk` package and lives at packages/sdk/apiV2.yaml
+ * The spec is owned by the `beds24-sdk-client` package and lives at packages/sdk/apiV2.yaml
  * (NOT knowledge/apiV2.yaml — that path is gone in the restructured monorepo).
  *
  * Drift detection is semantic, not textual: both docs are parsed to JSON and

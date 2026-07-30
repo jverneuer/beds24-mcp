@@ -1,6 +1,6 @@
 # Cross-package interface contract (read-only — both engineers honor this)
 
-The `beds24-sdk` and `beds24-knowledge` packages are built by two engineers in
+The `beds24-sdk-client` and `beds24-knowledge` packages are built by two engineers in
 parallel. They MUST expose exactly these shapes so the server package composes
 them without adaptation. Do not change signatures without updating this file and
 telling the integration engineer.
@@ -84,7 +84,7 @@ export interface Frontmatter { bucket?: Bucket; docUrl?: string; [key: string]: 
 export function parseFrontmatter(raw: string): { frontmatter: Frontmatter; body: string; };
 ```
 
-## `beds24-sdk` public surface (`packages/sdk/src/index.ts`)
+## `beds24-sdk-client` public surface (`packages/sdk/src/index.ts`)
 
 The SDK resolves its OWN spec (`apiV2.yaml` in the sdk package root). It must NOT
 import or reference any knowledge/facts dir.
@@ -123,5 +123,5 @@ export class WebhooksOps { constructor(client: Beds24Client); ... }
 
 ## Boundary rules (enforced by QA)
 
-- `beds24-sdk` MUST NOT import libsql, sqlite-vec, @huggingface/transformers, or the MCP SDK.
+- `beds24-sdk-client` MUST NOT import libsql, sqlite-vec, @huggingface/transformers, or the MCP SDK.
 - `beds24-knowledge` MUST NOT import openapi-fetch, ajv, js-yaml, or the MCP SDK.

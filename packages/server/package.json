@@ -1,7 +1,7 @@
 {
   "name": "beds24-mcp-server",
   "version": "1.1.5",
-  "description": "MCP server + CLI host for Beds24 — depends on beds24-sdk and beds24-knowledge. Published package with the beds24-mcp-server bin.",
+  "description": "MCP server + CLI host for Beds24 — depends on beds24-sdk-client and beds24-knowledge. Published package with the beds24-mcp-server bin.",
   "type": "module",
   "bin": {
     "beds24-mcp-server": "dist/cli.mjs"
@@ -25,7 +25,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.10.0",
     "beds24-knowledge": "workspace:*",
-    "beds24-sdk": "workspace:*",
+    "beds24-sdk-client": "workspace:*",
     "zod": "^3.23.0"
   },
   "devDependencies": {

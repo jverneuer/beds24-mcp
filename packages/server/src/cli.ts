@@ -5,12 +5,12 @@
  * The knowledge corpus defaults to the beds24-knowledge package's corpus
  * (packages/knowledge/knowledge/ in this checkout); override with
  * BEDS24_KNOWLEDGE_DIR. All real logic lives in the beds24-knowledge /
- * beds24-sdk workspace packages — this file only parses argv and prints.
+ * beds24-sdk-client workspace packages — this file only parses argv and prints.
  */
 
 import { countChunks, dbExists, getDb, DB_PATH } from "beds24-knowledge";
 import { buildIndex } from "beds24-knowledge";
-import { listEndpoints } from "beds24-sdk";
+import { listEndpoints } from "beds24-sdk-client";
 import { startServer } from "./server.ts";
 import { runSetup } from "./setup.ts";
 import { dirname, join } from "node:path";
