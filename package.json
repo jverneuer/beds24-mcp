@@ -39,6 +39,7 @@
     "setup": "bun run packages/server/src/cli.ts setup",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
+    "changeset": "changeset",
     "fetch-spec": "bun run scripts/fetch-spec.ts",
     "generate-types": "bun run scripts/generate-types.ts",
     "add-frontmatter": "bun run scripts/add-frontmatter.ts",
@@ -63,6 +64,7 @@
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.1",
     "@types/bun": "latest",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.0",

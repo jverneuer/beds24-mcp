@@ -1,0 +1,90 @@
+# Release workspace packages to npm — one independent version per package.
+#
+# This is a 3-package npm-workspace monorepo. The root package is private and
+# is NOT published. Each workspace package versions and publishes on its own:
+#
+#   - beds24-sdk-client    (typed V2 API client, schema introspection, validation)
+#   - beds24-knowledge     (vector+FTS indexing + hybrid search over the docs)
+#   - beds24-mcp-server    (MCP server + CLI bin; depends on the two above)
+#
+# How it works (Changesets):
+#   - A PR that should bump a package ships a changeset (.changeset/*.md).
+#   - On push to main, changesets/action opens/updates a "Version Packages" PR
+#     that consumes any pending changesets and bumps the affected packages.
+#   - When that PR lands (no pending changesets left), the publish step runs
+#     `changeset publish`, which publishes ONLY the packages whose version
+#     advanced — the others are skipped.
+#
+# The server declares its siblings as `workspace:*` dependencies. npm rewrites
+# those to the concrete version at publish time; `updateInternalDependencies`
+# in .changeset/config.json makes a dependency bump flow a patch to dependents.
+#
+# There is no shared version and no `v*.*.*` tag — each package carries its own
+# semver and is released when its own changes go out.
+#
+# Required secrets:
+#   NPM_TOKEN — an npm access token (Automation type, works with 2FA). Create it
+#   at https://npmjs.com -> Access Tokens -> Generate New Token -> Automation,
+#   then add it at https://github.com/jverneuer/beds24-mcp/settings/secrets/actions.
+#
+# Required permissions:
+#   contents: write + pull-requests: write — lets the action create and merge
+#     the Version Packages PR.
+#   id-token: write — lets npm attach provenance (links each package to this
+#     GitHub Actions run). Optional; drop `--provenance` if you don't want it.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+# The action creates/merges the Version Packages PR, so it needs write access.
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+# Never run two releases against main at once.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Build (CLI + SDK + knowledge bundles)
+        run: bun run build
+
+      - name: Verify CLI bundle loads
+        run: node dist/cli.mjs status
+
+      - name: Test
+        run: bun test
+
+      # If pending changesets exist, this creates/updates the "Version Packages"
+      # PR and does NOT publish. Once that PR merges (no pending changesets
+      # left), the same step publishes the changed packages instead.
+      - name: Create Version Packages PR or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: bun changeset publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
