@@ -13,8 +13,8 @@
  * this call. `WebhookPayload` is therefore the shape your receiver handles.
  */
 
-import type { Beds24Client, Beds24Response } from "../client.ts";
-import type { OpOf, RequestBodyOf } from "../api-types.ts";
+import type { Beds24Client, Beds24Response } from "../client.js";
+import type { OpOf, RequestBodyOf } from "../api-types.js";
 
 /**
  * The four webhook types (wiki-webhooks.md).

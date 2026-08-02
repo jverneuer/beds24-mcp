@@ -12,12 +12,12 @@
  * ```
  */
 
-export { KNOWN_BUCKETS, SAFE_BUCKETS, parseFrontmatter } from "./markdown/frontmatter.ts";
-export type { Bucket, Frontmatter } from "./markdown/frontmatter.ts";
+export { KNOWN_BUCKETS, SAFE_BUCKETS, parseFrontmatter } from "./markdown/frontmatter.js";
+export type { Bucket, Frontmatter } from "./markdown/frontmatter.js";
 
-export { chunkMarkdown, type Chunk } from "./markdown/chunk.ts";
+export { chunkMarkdown, type Chunk } from "./markdown/chunk.js";
 
-export { buildIndex, type BuildResult } from "./indexer.ts";
+export { buildIndex, type BuildResult } from "./indexer.js";
 
 export {
 	getDb,
@@ -29,9 +29,9 @@ export {
 	insertChunk,
 	DB_PATH,
 	EMBED_DIM,
-} from "./db.ts";
-export type { ChunkRow } from "./db.ts";
-export { defaultKnowledgeDir } from "./paths.ts";
+} from "./db.js";
+export type { ChunkRow } from "./db.js";
+export { defaultKnowledgeDir } from "./paths.js";
 
 export {
 	search,
@@ -39,7 +39,7 @@ export {
 	searchInBucket,
 	hybridSearch,
 	Beds24Search,
-} from "./search.ts";
-export type { SearchHit, HybridSearchOpts } from "./search.ts";
+} from "./search.js";
+export type { SearchHit, HybridSearchOpts } from "./search.js";
 
-export { embed } from "./embed.ts";
+export { embed } from "./embed.js";

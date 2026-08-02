@@ -23,7 +23,7 @@ export {
 	type Beds24Response,
 	type Credits,
 	type Scope,
-} from "./client.ts";
+} from "./client.js";
 
 // Generated-type helpers — let callers (and the server facade) derive strict
 // request/response types from an endpoint key. See api-types.ts.
@@ -34,16 +34,16 @@ export {
 	type ResponseBodyOf,
 	type paths,
 	type components,
-} from "./api-types.ts";
+} from "./api-types.js";
 
-export * from "./ops/index.ts";
+export * from "./ops/index.js";
 
 export {
 	Beds24Validator,
 	validateRequest,
 	type ValidationError,
 	type ValidationResult,
-} from "./schema/validate.ts";
+} from "./schema/validate.js";
 
 export {
 	getSchema,
@@ -53,4 +53,4 @@ export {
 	__resetSchemaIndex,
 	type Field,
 	type EndpointSchema,
-} from "./schema/schema.ts";
+} from "./schema/schema.js";

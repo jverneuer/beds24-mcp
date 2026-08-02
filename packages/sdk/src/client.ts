@@ -21,10 +21,10 @@
  *   - POST/PUT/PATCH send a JSON body.
  */
 
-import { getSchema, listEndpoints } from "./schema/schema.ts";
-import { validateRequest } from "./schema/validate.ts";
-import { defaultSpecDir } from "./paths.ts";
-import type { EndpointKey, OpOf, RequestBodyOf, ResponseBodyOf } from "./api-types.ts";
+import { getSchema, listEndpoints } from "./schema/schema.js";
+import { validateRequest } from "./schema/validate.js";
+import { defaultSpecDir } from "./paths.js";
+import type { EndpointKey, OpOf, RequestBodyOf, ResponseBodyOf } from "./api-types.js";
 
 /** Base URL for the Beds24 V2 JSON API. */
 export const DEFAULT_BASE_URL = "https://www.beds24.com/api/v2";

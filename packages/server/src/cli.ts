@@ -11,8 +11,8 @@
 import { countChunks, dbExists, getDb, DB_PATH } from "beds24-knowledge";
 import { buildIndex } from "beds24-knowledge";
 import { listEndpoints } from "beds24-sdk-client";
-import { startServer } from "./server.ts";
-import { runSetup } from "./setup.ts";
+import { startServer } from "./server.js";
+import { runSetup } from "./setup.js";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 

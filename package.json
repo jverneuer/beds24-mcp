@@ -45,9 +45,9 @@
     "add-frontmatter": "bun run scripts/add-frontmatter.ts",
     "prebuild": "bun run fetch-spec && bun run generate-types",
     "build": "bun run build:sdk && bun run build:knowledge && bun run build:server",
-    "build:sdk": "bun build packages/sdk/src/index.ts packages/sdk/src/client.ts packages/sdk/src/ops/index.ts packages/sdk/src/schema/validate.ts packages/sdk/src/schema/schema.ts --target node --packages=external --outdir packages/sdk/dist --sourcemap && mkdir -p packages/sdk/dist/generated && cp packages/sdk/src/generated/types.d.ts packages/sdk/dist/generated/types.d.ts",
-    "build:knowledge": "bun build packages/knowledge/src/index.ts --target node --packages=external --outdir packages/knowledge/dist --sourcemap",
-    "build:server": "bun build packages/server/src/cli.ts --target node --packages=external --outfile dist/cli.mjs --banner '#!/usr/bin/env node' && chmod +x dist/cli.mjs",
+    "build:sdk": "bun run --cwd packages/sdk build",
+    "build:knowledge": "bun run --cwd packages/knowledge build",
+    "build:server": "bun run --cwd packages/server build",
     "prepublishOnly": "bun run typecheck && bun run build"
   },
   "dependencies": {

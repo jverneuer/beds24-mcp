@@ -12,8 +12,8 @@
  * element, so it can never drift from the spec.
  */
 
-import type { Beds24Client, Beds24Response } from "../client.ts";
-import type { OpOf, RequestBodyOf, ResponseBodyOf } from "../api-types.ts";
+import type { Beds24Client, Beds24Response } from "../client.js";
+import type { OpOf, RequestBodyOf, ResponseBodyOf } from "../api-types.js";
 
 /** POST /inventory/rooms/calendar request body: an array of these elements. */
 export type CalendarWriteRequest = RequestBodyOf<OpOf<"POST /inventory/rooms/calendar">>;

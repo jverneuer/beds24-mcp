@@ -12,6 +12,6 @@
  * ```
  */
 
-export { startServer } from "./server.ts";
-export { runSetup } from "./setup.ts";
-export type { SetupOptions } from "./setup.ts";
+export { startServer } from "./server.js";
+export { runSetup } from "./setup.js";
+export type { SetupOptions } from "./setup.js";

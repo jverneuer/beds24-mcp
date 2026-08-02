@@ -18,8 +18,8 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { load } from "sqlite-vec";
 
-import { DB_PATH as DB_PATH_FROM_PATHS } from "./paths.ts";
-import type { Bucket } from "./markdown/frontmatter.ts";
+import { DB_PATH as DB_PATH_FROM_PATHS } from "./paths.js";
+import type { Bucket } from "./markdown/frontmatter.js";
 
 /** On-disk location of the regenerable vector index (see paths.ts for the value). */
 export const DB_PATH = DB_PATH_FROM_PATHS;

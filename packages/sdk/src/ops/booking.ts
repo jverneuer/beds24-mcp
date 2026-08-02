@@ -13,8 +13,8 @@
  * Partial, used for cancels and patches where you send only `id` + changed fields.
  */
 
-import type { Beds24Client, Beds24Response } from "../client.ts";
-import type { components, OpOf, RequestBodyOf, ResponseBodyOf } from "../api-types.ts";
+import type { Beds24Client, Beds24Response } from "../client.js";
+import type { components, OpOf, RequestBodyOf, ResponseBodyOf } from "../api-types.js";
 
 /** POST /bookings request body: an array of these elements. */
 export type BookingWriteRequest = RequestBodyOf<OpOf<"POST /bookings">>;

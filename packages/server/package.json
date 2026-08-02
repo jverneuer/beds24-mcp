@@ -6,20 +6,23 @@
   "bin": {
     "beds24-mcp-server": "dist/cli.mjs"
   },
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "engines": {
     "node": ">=24.0.0"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.json && bun build src/cli.ts --target node --packages=external --outfile dist/cli.mjs --banner '#!/usr/bin/env node' && chmod +x dist/cli.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

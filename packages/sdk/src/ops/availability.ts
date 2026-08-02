@@ -14,9 +14,9 @@
  * rather than re-derived — one source of truth for the shared write shape.
  */
 
-import type { Beds24Client, Beds24Response } from "../client.ts";
-import type { components, OpOf, RequestBodyOf, ResponseBodyOf } from "../api-types.ts";
-import type { CalendarWrite, CalendarWriteResponse } from "./pricing.ts";
+import type { Beds24Client, Beds24Response } from "../client.js";
+import type { components, OpOf, RequestBodyOf, ResponseBodyOf } from "../api-types.js";
+import type { CalendarWrite, CalendarWriteResponse } from "./pricing.js";
 
 /** GET /inventory/rooms/availability query params. */
 export type AvailabilityQuery = RequestBodyOf<OpOf<"GET /inventory/rooms/availability">>;

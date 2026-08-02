@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "allowImportingTsExtensions": false,
+    "types": ["bun-types", "node"]
+  },
+  "include": ["src/**/*.ts"],
+  // The CLI is bundled separately by bun (see build script) into dist/cli.mjs
+  // with a shebang; emit the library surface here, but not the CLI entrypoint.
+  "exclude": ["src/cli.ts"]
+}

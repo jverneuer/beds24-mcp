@@ -1,4 +1,4 @@
-import { parseFrontmatter, type Bucket } from "./frontmatter.ts";
+import { parseFrontmatter, type Bucket } from "./frontmatter.js";
 
 /**
  * Heading-aware markdown splitter.

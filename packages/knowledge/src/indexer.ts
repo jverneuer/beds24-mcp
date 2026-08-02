@@ -12,10 +12,10 @@
 import { readdirSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 
-import { chunkMarkdown, type Chunk } from "./markdown/chunk.ts";
-import { countChunks, getDb, insertChunk, resetDatabase } from "./db.ts";
-import type { Bucket } from "./markdown/frontmatter.ts";
-import { embed } from "./embed.ts";
+import { chunkMarkdown, type Chunk } from "./markdown/chunk.js";
+import { countChunks, getDb, insertChunk, resetDatabase } from "./db.js";
+import type { Bucket } from "./markdown/frontmatter.js";
+import { embed } from "./embed.js";
 
 /**
  * Path substrings that route a doc to the apiv1 pool (checked in order).

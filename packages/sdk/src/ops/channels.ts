@@ -11,8 +11,8 @@
  * from the spec (the old interface with an index signature redefined every field).
  */
 
-import type { Beds24Client, Beds24Response } from "../client.ts";
-import type { OpOf, RequestBodyOf, ResponseBodyOf } from "../api-types.ts";
+import type { Beds24Client, Beds24Response } from "../client.js";
+import type { OpOf, RequestBodyOf, ResponseBodyOf } from "../api-types.js";
 
 /** Connection type for a room (wiki-channel-manager.md). */
 export type ConnectionType = "api" | "ical";

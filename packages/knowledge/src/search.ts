@@ -16,10 +16,10 @@
  * them.
  */
 
-import { getDb, countChunks } from "./db.ts";
-import { embed } from "./embed.ts";
-import { KNOWN_BUCKETS, SAFE_BUCKETS } from "./markdown/frontmatter.ts";
-import type { Bucket } from "./markdown/frontmatter.ts";
+import { getDb, countChunks } from "./db.js";
+import { embed } from "./embed.js";
+import { KNOWN_BUCKETS, SAFE_BUCKETS } from "./markdown/frontmatter.js";
+import type { Bucket } from "./markdown/frontmatter.js";
 
 /** RRF constant — dampens the contribution of low-ranking candidates. */
 const RRF_K = 60;

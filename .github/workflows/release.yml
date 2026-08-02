@@ -72,7 +72,7 @@ jobs:
         run: bun run build
 
       - name: Verify CLI bundle loads
-        run: node dist/cli.mjs status
+        run: node packages/server/dist/cli.mjs status
 
       - name: Test
         run: bun test

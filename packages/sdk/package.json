@@ -3,25 +3,44 @@
   "version": "1.1.6",
   "description": "Typed wrapper over the Beds24 V2 JSON API — HTTP client, OpenAPI schema validation, and typed domain workflows (bookings, pricing, availability, channels, webhooks).",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./client": "./src/client.ts",
-    "./ops": "./src/ops/index.ts",
-    "./validate": "./src/validate.ts",
-    "./schema": "./src/schema.ts",
-    "./types": "./src/generated/types.d.ts",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js"
+    },
+    "./ops": {
+      "types": "./dist/ops/index.d.ts",
+      "import": "./dist/ops/index.js"
+    },
+    "./validate": {
+      "types": "./dist/schema/validate.d.ts",
+      "import": "./dist/schema/validate.js"
+    },
+    "./schema": {
+      "types": "./dist/schema/schema.d.ts",
+      "import": "./dist/schema/schema.js"
+    },
+    "./types": {
+      "types": "./dist/generated/types.d.ts",
+      "import": "./dist/generated/types.d.ts"
+    },
     "./package.json": "./package.json"
   },
   "files": [
-    "src",
+    "dist",
     "apiV2.yaml"
   ],
   "engines": {
     "node": ">=24.0.0"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.json && mkdir -p dist/generated && cp src/generated/types.d.ts dist/generated/types.d.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

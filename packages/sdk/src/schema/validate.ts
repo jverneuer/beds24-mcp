@@ -8,8 +8,8 @@
 
 import Ajv, { type ErrorObject } from "ajv";
 import addFormats from "ajv-formats";
-import { getSchema, type Field } from "./schema.ts";
-import { defaultSpecDir } from "../paths.ts";
+import { getSchema, type Field } from "./schema.js";
+import { defaultSpecDir } from "../paths.js";
 
 /** A single validation error, shaped for LLM consumption. */
 export interface ValidationError {

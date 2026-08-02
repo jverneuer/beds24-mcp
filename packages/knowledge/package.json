@@ -3,20 +3,24 @@
   "version": "1.1.6",
   "description": "Knowledge processing, vector+FTS indexing, and hybrid search over the Beds24 documentation corpus. libsql + sqlite-vec + local embeddings.",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
-    "src",
+    "dist",
     "knowledge"
   ],
   "engines": {
     "node": ">=24.0.0"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
