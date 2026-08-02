@@ -1,6 +1,7 @@
 /**
- * Beds24Client tests — mocks global fetch to exercise the auth lifecycle,
- * error mapping, credit headers, and request validation without a network.
+ * Beds24Client tests — mocks global fetch to exercise the V2 auth lifecycle,
+ * error mapping, credit headers, query-string params, and request validation
+ * without a network.
  */
 
 import { test, expect, describe, beforeEach } from "bun:test";
@@ -57,21 +58,44 @@ function jsonResponse(body: unknown, init?: ResponseInit): Response {
 }
 
 describe("Beds24Client auth", () => {
-	test("fetches a token lazily and sends it as a header", async () => {
+	test("mints a token lazily from a refreshToken and sends it as a header", async () => {
 		mockFetch.set([
 			jsonResponse({ token: "tok-123" }),
 			jsonResponse({ bookings: [] }, { headers: { "x-five-min-limit-remaining": "99", "x-five-min-limit-resets-in": "299" } }),
 		]);
-		const client = new Beds24Client({ apiKey: "ak", propKey: "pk" });
+		const client = new Beds24Client({ refreshToken: "rt" });
 		const res = await client.request("GET /bookings", { arrival: "2026-08-01" });
 
 		expect(mockFetch.calls()).toHaveLength(2);
-		expect(mockFetch.calls()[0]!.url).toContain("/json/getAuthenticationToken");
-		expect(mockFetch.calls()[0]!.url).toContain("apiKey=ak");
+		// auth fetch hits /authentication/token with the refreshToken header
+		expect(mockFetch.calls()[0]!.url).toContain("/authentication/token");
+		const authHeaders = mockFetch.calls()[0]!.init?.headers as Record<string, string>;
+		expect(authHeaders.refreshToken).toBe("rt");
+		// real request carries the minted token + serializes params to query string
+		expect(mockFetch.calls()[1]!.url).toContain("/bookings?arrival=2026-08-01");
 		const reqHeaders = mockFetch.calls()[1]!.init?.headers as Record<string, string>;
 		expect(reqHeaders.token).toBe("tok-123");
 		expect(res.credits.remaining).toBe(99);
 		expect(res.credits.resetsIn).toBe(299);
+	});
+
+	test("bootstraps from an invite code, then mints from the returned refreshToken", async () => {
+		mockFetch.set([
+			// /authentication/setup → token + refreshToken
+			jsonResponse({ token: "tok-invite", refreshToken: "rt-invite" }),
+			// 401 on first request → client should refresh via /authentication/token
+			new Response("unauthorized", { status: 401 }),
+			// /authentication/token → fresh token
+			jsonResponse({ token: "tok-refreshed" }),
+			jsonResponse({ bookings: [] }),
+		]);
+		const client = new Beds24Client({ inviteCode: "INVITE" });
+		const res = await client.request("GET /bookings");
+		expect(res.data).toEqual({ bookings: [] });
+		const urls = mockFetch.calls().map((c) => c.url);
+		expect(urls[0]).toContain("/authentication/setup");
+		expect(urls[2]).toContain("/authentication/token");
+		expect(mockFetch.calls()).toHaveLength(4);
 	});
 
 	test("refreshes token once on 401 (single-flight)", async () => {
@@ -81,19 +105,19 @@ describe("Beds24Client auth", () => {
 			jsonResponse({ token: "new" }),
 			jsonResponse({ bookings: [] }),
 		]);
-		const client = new Beds24Client({ apiKey: "ak", propKey: "pk" });
+		const client = new Beds24Client({ refreshToken: "rt" });
 		const res = await client.request("GET /bookings");
 		expect(res.data).toEqual({ bookings: [] });
-		// auth(failed) + request(401) + re-auth + request(retry success)
+		// auth + request(401) + re-auth + request(retry success)
 		expect(mockFetch.calls()).toHaveLength(4);
 		const paths = mockFetch.calls().map((c) => c.url);
-		expect(paths[0]).toContain("getAuthenticationToken");
-		expect(paths[2]).toContain("getAuthenticationToken");
+		expect(paths[0]).toContain("/authentication/token");
+		expect(paths[2]).toContain("/authentication/token");
 	});
 
 	test("reuses a provided token without fetching", async () => {
 		mockFetch.set([jsonResponse({ bookings: [] })]);
-		const client = new Beds24Client({ apiKey: "ak", propKey: "pk", token: "given" });
+		const client = new Beds24Client({ token: "given" });
 		await client.request("GET /bookings");
 		expect(mockFetch.calls()).toHaveLength(1);
 		const headers = mockFetch.calls()[0]!.init?.headers as Record<string, string>;
@@ -104,10 +128,9 @@ describe("Beds24Client auth", () => {
 describe("Beds24Client errors", () => {
 	test("maps HTTP + Beds24 error codes to Beds24Error", async () => {
 		mockFetch.set([
-			jsonResponse({ token: "t" }),
 			new Response(JSON.stringify({ code: 1016, message: "rate limit" }), { status: 429 }),
 		]);
-		const client = new Beds24Client({ apiKey: "ak", propKey: "pk" });
+		const client = new Beds24Client({ token: "t" });
 		let caught: Beds24Error | undefined;
 		try {
 			await client.request("GET /bookings");
@@ -125,7 +148,7 @@ describe("Beds24Client errors", () => {
 			throw new Error("conn refused");
 		}) as unknown as typeof fetch;
 		globalThis.fetch = fn;
-		const client = new Beds24Client({ apiKey: "ak", propKey: "pk", token: "t" });
+		const client = new Beds24Client({ token: "t" });
 		let caught: Beds24Error | undefined;
 		try {
 			await client.request("GET /bookings");
@@ -139,7 +162,7 @@ describe("Beds24Client errors", () => {
 
 describe("Beds24Client request validation", () => {
 	test("rejects an invalid request body before any fetch (never hits the wire)", async () => {
-		const client = new Beds24Client({ apiKey: "ak", propKey: "pk", token: "t" });
+		const client = new Beds24Client({ token: "t" });
 		let caught: Beds24Error | undefined;
 		try {
 			// POST /bookings requires an array; a bare string is invalid.

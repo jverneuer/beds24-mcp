@@ -5,34 +5,48 @@
  *  - four types: V1 GET booking, V2 POST booking, Auto Action, Inventory
  *  - delivery is asynchronous (~1 min delay)
  *  - booking webhook URL is configured at Settings > Properties > Access
+ *
+ * IMPORTANT — what this endpoint actually is: the spec's
+ * `POST Webhooks - bookings` documents the payload Beds24 POSTs *to your* webhook
+ * URL (its description is "The webhook payload sent to your URL"). It is NOT a
+ * registration endpoint — webhook URLs are configured in the Beds24 UI, not via
+ * this call. `WebhookPayload` is therefore the shape your receiver handles.
  */
 
 import type { Beds24Client, Beds24Response } from "../client.ts";
+import type { OpOf, RequestBodyOf } from "../api-types.ts";
 
-/** The four webhook types (wiki-webhooks.md). */
+/**
+ * The four webhook types (wiki-webhooks.md).
+ *
+ * This is a knowledge-base classification — the spec's webhook payload does not
+ * carry a type discriminator, so there is no generated enum to wrap. It is kept
+ * as a domain constant for receivers that route by type.
+ */
 export type WebhookType = "bookingV1" | "bookingV2" | "autoAction" | "inventory";
 
-/** A webhook registration payload (`POST Webhooks - bookings`). */
-export interface WebhookRegistration {
-	type: WebhookType;
-	url: string;
-	enabled?: boolean;
-	[key: string]: unknown;
-}
+/**
+ * The webhook payload POSTed to your URL. Wraps the inline generated body of
+ * `POST Webhooks - bookings` verbatim (`timeStamp` + `booking` + `infoItems` +
+ * `invoiceItems` + `messages` + `retries`), so it can never drift from the spec.
+ */
+export type WebhookPayload = RequestBodyOf<OpOf<"POST Webhooks - bookings">>;
 
 export class WebhooksOps {
 	constructor(private client: Beds24Client) {}
 
 	/**
-	 * Register (or update) a webhook. Delivery is asynchronous — expect a
-	 * ~1 minute delay before the first fire (wiki-webhooks.md).
+	 * Post a webhook payload (the shape your webhook URL receives). The spec
+	 * documents no response for this endpoint, so the decoded `data` is `unknown`.
 	 */
-	async register(reg: WebhookRegistration): Promise<Beds24Response<unknown>> {
-		return this.client.request("POST Webhooks - bookings", reg);
+	async register(payload: WebhookPayload): Promise<Beds24Response<unknown>> {
+		return this.client.request("POST Webhooks - bookings", payload);
 	}
 
-	/** Register the V2 booking webhook (the recommended type). */
-	async registerBooking(url: string): Promise<Beds24Response<unknown>> {
-		return this.register({ type: "bookingV2", url, enabled: true });
+	/** Build + post a V2 booking-webhook payload (the recommended type). */
+	async registerBooking(
+		booking: NonNullable<WebhookPayload["booking"]>,
+	): Promise<Beds24Response<unknown>> {
+		return this.register({ timeStamp: new Date().toISOString(), booking });
 	}
 }

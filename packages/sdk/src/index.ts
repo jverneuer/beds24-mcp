@@ -8,7 +8,7 @@
  * server/knowledge packages.
  *
  * ```
- * const client = new Beds24Client({ apiKey, propKey });
+ * const client = new Beds24Client({ refreshToken });
  * const bookings = new BookingOps(client);
  * ```
  */
@@ -24,6 +24,17 @@ export {
 	type Credits,
 	type Scope,
 } from "./client.ts";
+
+// Generated-type helpers — let callers (and the server facade) derive strict
+// request/response types from an endpoint key. See api-types.ts.
+export {
+	type EndpointKey,
+	type OpOf,
+	type RequestBodyOf,
+	type ResponseBodyOf,
+	type paths,
+	type components,
+} from "./api-types.ts";
 
 export * from "./ops/index.ts";
 

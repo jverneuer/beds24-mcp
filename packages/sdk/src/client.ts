@@ -1,22 +1,33 @@
 /**
- * Low-level Beds24 API client — HTTP + auth.
+ * Low-level Beds24 V2 API client — HTTP + auth.
  *
  * Dependency-free: uses global `fetch` (Node 18+). Every V2 endpoint documented
- * in apiV2.yaml is reachable via `client.request("METHOD /path", body)`; request
+ * in apiV2.yaml is reachable via `client.request("METHOD /path", params)`; POST
  * bodies are validated client-side against the same schemas the local validator
  * uses (fail fast, save a credit).
  *
- * Auth: pass apiKey + propKey. The client lazily fetches a 24h token from
- * `/authentication/token` and sends it as a `token:` header. On a 401 it
- * refreshes once (single-flight — concurrent calls share one refresh promise).
+ * Auth is the V2 model only (the legacy apiKey/propKey flow is intentionally
+ * NOT supported here — it lives outside /api/v2). Pass ONE of:
+ *   - `inviteCode`  → exchanged once for a token + refreshToken (`/authentication/setup`)
+ *   - `refreshToken`→ mints a 24h token (`/authentication/token`)
+ *   - `token`       → used directly, no minting
+ * The token is sent as a `token:` header. On a 401 it refreshes once via the
+ * refreshToken (single-flight — concurrent calls share one refresh promise).
+ *
+ * Params/serialization:
+ *   - GET/DELETE serialize `body` into the query string (arrays become repeated
+ *     keys, e.g. `?id=1&id=2`), with no JSON body — the spec gives every
+ *     GET/DELETE only `in: query` params and no requestBody.
+ *   - POST/PUT/PATCH send a JSON body.
  */
 
 import { getSchema, listEndpoints } from "./schema/schema.ts";
 import { validateRequest } from "./schema/validate.ts";
 import { defaultSpecDir } from "./paths.ts";
+import type { EndpointKey, OpOf, RequestBodyOf, ResponseBodyOf } from "./api-types.ts";
 
-/** Base URL for the Beds24 JSON API. */
-export const DEFAULT_BASE_URL = "https://www.beds24.com/api";
+/** Base URL for the Beds24 V2 JSON API. */
+export const DEFAULT_BASE_URL = "https://www.beds24.com/api/v2";
 
 /** V2 token scopes (from api-v2/auth-and-setup.md). */
 export const Scopes = {
@@ -80,15 +91,24 @@ export class Beds24Error extends Error {
 	}
 }
 
-/** Configuration for the API client. */
+/** Configuration for the API client (V2 auth model). */
 export interface Beds24ClientConfig {
-	/** Account API key (from Account Settings). */
-	apiKey: string;
-	/** Property key (from Property Settings). */
-	propKey: string;
-	/** Reuse an existing token instead of fetching one. */
+	/**
+	 * Invite code (from Settings > Marketplace > API). Exchanged ONCE for a
+	 * token + refreshToken via `/authentication/setup`; after that the client
+	 * uses the refreshToken to mint fresh 24h tokens.
+	 */
+	inviteCode?: string;
+	/**
+	 * Long-lived refresh token. Used to mint a 24h token via
+	 * `/authentication/token`. Prefer this for non-interactive use.
+	 */
+	refreshToken?: string;
+	/** Use an existing token directly instead of minting one. */
 	token?: string;
-	/** API base URL. Defaults to https://www.beds24.com/api. */
+	/** Optional device name sent to `/authentication/setup`. */
+	deviceName?: string;
+	/** API base URL. Defaults to https://www.beds24.com/api/v2. */
 	baseUrl?: string;
 	/** Per-call cancellation signal. */
 	signal?: AbortSignal;
@@ -117,8 +137,9 @@ function resolveSpecDir(): string {
 }
 
 export class Beds24Client {
-	private apiKey: string;
-	private propKey: string;
+	private inviteCode?: string;
+	private refreshToken?: string;
+	private deviceName?: string;
 	private baseUrl: string;
 	private token: string | null;
 	private signal?: AbortSignal;
@@ -130,8 +151,9 @@ export class Beds24Client {
 	readonly endpoints: string[];
 
 	constructor(config: Beds24ClientConfig) {
-		this.apiKey = config.apiKey;
-		this.propKey = config.propKey;
+		this.inviteCode = config.inviteCode;
+		this.refreshToken = config.refreshToken;
+		this.deviceName = config.deviceName;
 		this.baseUrl = (config.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, "");
 		this.token = config.token ?? null;
 		this.signal = config.signal;
@@ -150,14 +172,55 @@ export class Beds24Client {
 	}
 
 	private async fetchToken(): Promise<string> {
-		const url = `${this.baseUrl}/json/getAuthenticationToken?apiKey=${encodeURIComponent(
-			this.apiKey,
-		)}&propKey=${encodeURIComponent(this.propKey)}`;
-		const res = await fetch(url, { signal: this.signal });
+		// Invite codes are single-time-use: exchange once, then live off the
+		// refreshToken it returns. See api-v2/auth-and-setup.md.
+		if (this.inviteCode) return this.fetchTokenFromInvite();
+		if (this.refreshToken) return this.fetchTokenFromRefresh();
+		throw new Beds24Error({
+			message: "auth failed: pass inviteCode, refreshToken, or token",
+			status: 0,
+			retryable: false,
+		});
+	}
+
+	/** GET /authentication/setup — exchange an invite code for token + refreshToken. */
+	private async fetchTokenFromInvite(): Promise<string> {
+		const headers: Record<string, string> = {
+			code: this.inviteCode!,
+			accept: "application/json",
+		};
+		if (this.deviceName) headers.deviceName = this.deviceName;
+		const res = await fetch(`${this.baseUrl}/authentication/setup`, {
+			method: "GET",
+			headers,
+			signal: this.signal,
+		});
+		const body = (await res.json()) as { token?: string; refreshToken?: string };
+		if (!res.ok || !body.token) {
+			throw new Beds24Error({
+				message: `auth setup failed: ${res.status}`,
+				status: res.status,
+				retryable: res.status >= 500,
+			});
+		}
+		// Persist the refreshToken for future minting; invite codes are one-shot.
+		if (body.refreshToken) this.refreshToken = body.refreshToken;
+		this.inviteCode = undefined;
+		this.token = body.token;
+		return body.token;
+	}
+
+	/** GET /authentication/token — mint a 24h token from a refresh token. */
+	private async fetchTokenFromRefresh(): Promise<string> {
+		const res = await fetch(`${this.baseUrl}/authentication/token`, {
+			method: "GET",
+			headers: { refreshToken: this.refreshToken!, accept: "application/json" },
+			signal: this.signal,
+		});
 		const body = (await res.json()) as { token?: string };
 		if (!res.ok || !body.token) {
 			throw new Beds24Error({
-				message: `auth failed: ${res.status}`,
+				message: `token refresh failed: ${res.status}`,
 				status: res.status,
 				retryable: res.status >= 500,
 			});
@@ -173,14 +236,21 @@ export class Beds24Client {
 
 	/**
 	 * Call a documented endpoint by its `METHOD /path` key (e.g. `GET /bookings`).
-	 * When `body` is given it is validated against the request schema first and
-	 * JSON-encoded. `opts.idempotencyKey` attaches an `Idempotency-Key` header.
+	 * For GET/DELETE, `body` is serialized into the query string; for
+	 * POST/PUT/PATCH it is validated against the request schema first, then
+	 * sent as a JSON body. `opts.idempotencyKey` attaches an `Idempotency-Key`
+	 * header.
+	 *
+	 * `E` is constrained to the `EndpointKey` union (every `METHOD /path` the
+	 * spec defines), so the body and response types are inferred from the
+	 * generated `paths`: a GET infers its query params, a POST infers its JSON
+	 * request body, and the decoded `data` type comes from the 200/201 response.
 	 */
-	async request<T = unknown>(
-		endpoint: string,
-		body?: unknown,
+	async request<E extends EndpointKey>(
+		endpoint: E,
+		body?: RequestBodyOf<OpOf<E>>,
 		opts?: { idempotencyKey?: string; signal?: AbortSignal },
-	): Promise<Beds24Response<T>> {
+	): Promise<Beds24Response<ResponseBodyOf<OpOf<E>>>> {
 		const ep = parseEndpoint(endpoint);
 
 		// Only validate when this endpoint has a request schema. GET endpoints
@@ -201,15 +271,36 @@ export class Beds24Client {
 
 		const token = await this.getToken();
 		try {
-			return await this.doFetch<T>(token, ep, body, opts);
+			return await this.doFetch<ResponseBodyOf<OpOf<E>>>(token, ep, body, opts);
 		} catch (e) {
 			if (e instanceof Beds24Error && e.status === 401) {
 				this.resetToken();
 				const fresh = await this.getToken();
-				return await this.doFetch<T>(fresh, ep, body, opts);
+				return await this.doFetch<ResponseBodyOf<OpOf<E>>>(fresh, ep, body, opts);
 			}
 			throw e;
 		}
+	}
+
+	/**
+	 * Serialize params into a query string. Arrays become repeated keys
+	 * (e.g. `id=1&id=2`) per the V2 convention — see api-v2/bookings.md.
+	 * Returns "" for undefined/null/non-object params.
+	 */
+	private buildQueryString(params: unknown): string {
+		if (!params || typeof params !== "object") return "";
+		const sp = new URLSearchParams();
+		for (const [key, value] of Object.entries(params as Record<string, unknown>)) {
+			if (value === undefined || value === null) continue;
+			if (Array.isArray(value)) {
+				for (const v of value) {
+					if (v !== undefined && v !== null) sp.append(key, String(v));
+				}
+			} else {
+				sp.append(key, String(value));
+			}
+		}
+		return sp.toString();
 	}
 
 	private async doFetch<T>(
@@ -218,14 +309,22 @@ export class Beds24Client {
 		body: unknown,
 		opts?: { idempotencyKey?: string; signal?: AbortSignal },
 	): Promise<Beds24Response<T>> {
-		const url = `${this.baseUrl}${ep.path}`;
-		const headers: Record<string, string> = { token };
+		const headers: Record<string, string> = { token, accept: "application/json" };
 		if (opts?.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
+
+		// GET/DELETE carry params in the query string (never a JSON body); the
+		// spec gives them only `in: query` params and no requestBody.
+		const isQueryMethod = ep.method === "GET" || ep.method === "DELETE";
+		let url = `${this.baseUrl}${ep.path}`;
+		if (isQueryMethod) {
+			const qs = this.buildQueryString(body);
+			if (qs) url += `?${qs}`;
+		}
 
 		let res: Response;
 		try {
 			const init: RequestInit = { method: ep.method, headers, signal: opts?.signal ?? this.signal };
-			if (body !== undefined) {
+			if (body !== undefined && !isQueryMethod) {
 				headers["Content-Type"] = "application/json";
 				init.body = JSON.stringify(body);
 			}

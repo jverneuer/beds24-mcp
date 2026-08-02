@@ -3,114 +3,102 @@
  *
  * Encodes the booking conventions documented in knowledge/api-v2/bookings.md and
  * knowledge/system-logic/booking-lifecycle.md:
- *  - create vs update is decided by bookId presence (array POST)
+ *  - create vs update is decided by `id` presence (array POST, bookings.md §2.1)
  *  - cancelled bookings are excluded by default in reads
- *  - status codes: 0=Cancelled 1=Confirmed 2=New 3=Request 4=Black 5=Inquiry
  *  - a booking can be cancelled but never deleted
+ *
+ * Every type here WRAPS the generated OpenAPI schemas (see api-types.ts) — none of
+ * them redefine a wire field. `BookingCreate` is the full create shape (required
+ * roomId/arrival/departure enforced at compile time); `BookingUpdate` is its
+ * Partial, used for cancels and patches where you send only `id` + changed fields.
  */
 
 import type { Beds24Client, Beds24Response } from "../client.ts";
+import type { components, OpOf, RequestBodyOf, ResponseBodyOf } from "../api-types.ts";
 
-/** Booking status codes (booking-lifecycle.md). */
+/** POST /bookings request body: an array of these elements. */
+export type BookingWriteRequest = RequestBodyOf<OpOf<"POST /bookings">>;
+/** GET /bookings query params. */
+export type BookingQuery = RequestBodyOf<OpOf<"GET /bookings">>;
+/** Decoded POST /bookings response `data`. */
+export type BookingWriteResponse = ResponseBodyOf<OpOf<"POST /bookings">>;
+/** Decoded GET /bookings response `data`. */
+export type BookingListResponse = ResponseBodyOf<OpOf<"GET /bookings">>;
+
+/**
+ * A full booking to create. Wraps the generated `newBooking` + `bookingActions`
+ * schemas, so `roomId`/`arrival`/`departure` are required exactly as the API
+ * demands. No `id` — its absence tells the API this is a create (bookings.md §2.1).
+ */
+export type BookingCreate = components["schemas"]["newBooking"] & components["schemas"]["bookingActions"];
+
+/**
+ * A partial booking to update. Wraps the same schemas as `BookingCreate` but made
+ * Partial — the API accepts `id` plus only the fields you're changing
+ * (bookings.md §2.1). `id` stays required so the API knows which booking to patch.
+ *
+ * NOTE: the generated POST schema models the *create* shape (required fields), so a
+ * partial is not assignable to it. `update`/`cancel` therefore cast at the
+ * `request()` boundary — a single, documented escape hatch for the one place the
+ * schema over-constrains the wire.
+ */
+export type BookingUpdate = Partial<components["schemas"]["newBooking"]> &
+	Partial<components["schemas"]["bookingActions"]> & { id: number };
+
+/**
+ * Booking status values — the wire enum from the generated `newBooking.status`.
+ * Locked to the generated enum with `satisfies`, so it can never drift from the
+ * spec (the old numeric codes were a knowledge-base concept, not the wire format).
+ */
 export const BookingStatus = {
-	Cancelled: 0,
-	Confirmed: 1,
-	New: 2,
-	Request: 3,
-	Black: 4,
-	Inquiry: 5,
-} as const;
+	Confirmed: "confirmed",
+	Request: "request",
+	New: "new",
+	Cancelled: "cancelled",
+	Black: "black",
+	Inquiry: "inquiry",
+} as const satisfies Record<string, components["schemas"]["newBooking"]["status"]>;
 export type BookingStatus = (typeof BookingStatus)[keyof typeof BookingStatus];
-
-/** A booking payload for create/update (`POST /bookings`, bookings.md). */
-export interface BookingDraft {
-	/** Present = update, absent = create (the array-POST convention). */
-	bookId?: string;
-	propId?: string;
-	roomId?: string;
-	checkIn?: string;
-	checkOut?: string;
-	guestFirstName?: string;
-	guestName?: string;
-	guestEmail?: string;
-	status?: BookingStatus;
-	[key: string]: unknown;
-}
-
-/** Filter for `GET /bookings` (bookings.md). */
-export interface BookingFilter {
-	/** Bookings modified since this ISO timestamp. */
-	modifiedFrom?: string;
-	/** Bookings modified before this ISO timestamp. */
-	modifiedTo?: string;
-	/** Include cancelled bookings (excluded by default). */
-	includeCancelled?: boolean;
-	status?: BookingStatus;
-	propId?: string;
-	roomId?: string;
-	/** Free-text search. */
-	searchText?: string;
-	/** Page number (1-based). */
-	page?: number;
-	/** Page size. */
-	limit?: number;
-}
-
-/** A normalized booking returned by the API. */
-export interface Booking {
-	bookId: string;
-	propId: string;
-	roomId: string;
-	checkIn: string;
-	checkOut: string;
-	status: BookingStatus;
-	[key: string]: unknown;
-}
 
 export class BookingOps {
 	constructor(private client: Beds24Client) {}
 
 	/**
-	 * Create or update a bookings. Pass one or more drafts as an array
-	 * (V2 POST convention); bookId presence on each decides create vs update.
+	 * Create bookings (array POST; bookings.md §2.1). Each element is a full
+	 * `BookingCreate` — `roomId`/`arrival`/`departure` are required. Omit `id`.
 	 */
-	async create(drafts: BookingDraft | BookingDraft[]): Promise<Beds24Response<unknown>> {
+	async create(drafts: BookingCreate | BookingCreate[]): Promise<Beds24Response<BookingWriteResponse>> {
 		const items = Array.isArray(drafts) ? drafts : [drafts];
 		return this.client.request("POST /bookings", items);
 	}
 
-	/** Read bookings. Cancelled are excluded unless `includeCancelled` is set. */
-	async get(filter: BookingFilter = {}): Promise<Beds24Response<unknown>> {
-		const params = toQuery(filter);
-		return this.client.request("GET /bookings", params);
+	/**
+	 * Update existing bookings (array POST; bookings.md §2.1). Each element is a
+	 * `BookingUpdate` — `id` plus only the fields you're changing. Used for
+	 * patches and cancels.
+	 */
+	async update(drafts: BookingUpdate | BookingUpdate[]): Promise<Beds24Response<BookingWriteResponse>> {
+		const items = Array.isArray(drafts) ? drafts : [drafts];
+		// Partial update: see BookingUpdate for why this cast is required.
+		return this.client.request("POST /bookings", items as unknown as BookingWriteRequest);
 	}
 
-	/** Read a single booking by id. */
-	async getById(bookId: string): Promise<Beds24Response<unknown>> {
-		return this.client.request("GET /bookings", { bookId });
+	/** Read bookings. Cancelled are excluded unless `status` includes "cancelled". */
+	async get(filter: BookingQuery = {}): Promise<Beds24Response<BookingListResponse>> {
+		return this.client.request("GET /bookings", filter);
+	}
+
+	/** Read bookings by id (wraps the `id` query param, which takes an array). */
+	async getById(id: number): Promise<Beds24Response<BookingListResponse>> {
+		return this.client.request("GET /bookings", { id: [id] });
 	}
 
 	/**
-	 * Cancel a booking. Note: bookings can be cancelled but never deleted
-	 * (bookings.md). Booking.com cancellations have channel-specific
+	 * Cancel a booking (set status "cancelled"; bookings can be cancelled but never
+	 * deleted — bookings.md). Booking.com cancellations have channel-specific
 	 * prerequisites that must be fulfilled first (booking-lifecycle.md).
 	 */
-	async cancel(bookId: string): Promise<Beds24Response<unknown>> {
-		return this.client.request("POST /bookings", [{ bookId, status: BookingStatus.Cancelled }]);
+	async cancel(id: number): Promise<Beds24Response<BookingWriteResponse>> {
+		return this.update({ id, status: BookingStatus.Cancelled });
 	}
-}
-
-/** Build a query object, dropping undefined entries. */
-function toQuery(filter: BookingFilter): Record<string, unknown> {
-	const out: Record<string, unknown> = {};
-	if (filter.modifiedFrom) out.modifiedFrom = filter.modifiedFrom;
-	if (filter.modifiedTo) out.modifiedTo = filter.modifiedTo;
-	if (filter.includeCancelled) out.includeCancelled = true;
-	if (filter.status !== undefined) out.status = filter.status;
-	if (filter.propId) out.propId = filter.propId;
-	if (filter.roomId) out.roomId = filter.roomId;
-	if (filter.searchText) out.searchText = filter.searchText;
-	if (filter.page) out.page = filter.page;
-	if (filter.limit) out.limit = filter.limit;
-	return out;
 }

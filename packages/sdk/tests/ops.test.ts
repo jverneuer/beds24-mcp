@@ -1,7 +1,11 @@
 /**
- * BookingOps tests — verify each op composes the correct endpoint + method and
- * encodes its system-logic rule. We assert on the (endpoint, body) handed to
+ * Ops tests — verify each op composes the correct endpoint + method and encodes
+ * its system-logic rule. We assert on the (endpoint, body) handed to
  * Beds24.request, not on network I/O.
+ *
+ * Fixtures are wire-correct against the generated schemas (newBooking requires
+ * roomId/arrival/departure; the calendar write is { roomId, calendar: [{ from, to,
+ * multiplier }] }; roomId is a number; booking status is a string-enum array).
  */
 
 import { test, expect, describe } from "bun:test";
@@ -23,32 +27,34 @@ function recordingClient() {
 }
 
 describe("BookingOps", () => {
-	test("create wraps drafts in an array and targets POST /bookings", async () => {
+	test("create wraps a full draft in an array and targets POST /bookings", async () => {
 		const { client, calls } = recordingClient();
 		const { BookingOps } = await import("../src/ops/booking.ts");
 		const ops = new BookingOps(client);
-		await ops.create({ propId: "p1", guestName: "Ada" });
+		await ops.create({ roomId: 1001, arrival: "2026-08-01", departure: "2026-08-05", firstName: "Ada" });
 		expect(calls).toHaveLength(1);
 		expect(calls[0]!.endpoint).toBe("POST /bookings");
-		expect(calls[0]!.body).toEqual([{ propId: "p1", guestName: "Ada" }]);
+		expect(calls[0]!.body).toEqual([
+			{ roomId: 1001, arrival: "2026-08-01", departure: "2026-08-05", firstName: "Ada" },
+		]);
 	});
 
 	test("cancel sets status Cancelled (never deletes)", async () => {
 		const { client, calls } = recordingClient();
 		const { BookingOps } = await import("../src/ops/booking.ts");
 		const ops = new BookingOps(client);
-		await ops.cancel("bk-1");
+		await ops.cancel(12345);
 		expect(calls[0]!.endpoint).toBe("POST /bookings");
-		expect(calls[0]!.body).toEqual([{ bookId: "bk-1", status: BookingStatus.Cancelled }]);
+		expect(calls[0]!.body).toEqual([{ id: 12345, status: BookingStatus.Cancelled }]);
 	});
 
-	test("get forwards a filter and includes includeCancelled flag", async () => {
+	test("get forwards a status-array filter (cancelled excluded unless requested)", async () => {
 		const { client, calls } = recordingClient();
 		const { BookingOps } = await import("../src/ops/booking.ts");
 		const ops = new BookingOps(client);
-		await ops.get({ includeCancelled: true, status: BookingStatus.Confirmed });
+		await ops.get({ status: ["cancelled", "confirmed"] });
 		expect(calls[0]!.endpoint).toBe("GET /bookings");
-		expect(calls[0]!.body).toEqual({ includeCancelled: true, status: 1 });
+		expect(calls[0]!.body).toEqual({ status: ["cancelled", "confirmed"] });
 	});
 });
 
@@ -57,7 +63,7 @@ describe("PricingOps", () => {
 		const { client, calls } = recordingClient();
 		const { PricingOps } = await import("../src/ops/pricing.ts");
 		const ops = new PricingOps(client);
-		await ops.setDailyPrices({ roomId: "r1", date: "2026-08-01" });
+		await ops.setDailyPrices({ roomId: 1001, calendar: [{ from: "2026-08-01", to: "2026-08-05", multiplier: 1 }] });
 		expect(calls[0]!.endpoint).toBe("POST /inventory/rooms/calendar");
 	});
 
@@ -65,19 +71,24 @@ describe("PricingOps", () => {
 		const { client, calls } = recordingClient();
 		const { PricingOps } = await import("../src/ops/pricing.ts");
 		const ops = new PricingOps(client);
-		const { model } = await ops.pushToChannel("Airbnb", { roomId: "r1", date: "2026-08-01" });
+		const { model } = await ops.pushToChannel("Airbnb", {
+			roomId: 1001,
+			calendar: [{ from: "2026-08-01", to: "2026-08-05", multiplier: 1 }],
+		});
 		expect(model).toBe(CHANNEL_PRICE_MODEL.Airbnb);
 		expect(calls[0]!.endpoint).toBe("POST /inventory/rooms/calendar");
 	});
 });
 
 describe("AvailabilityOps", () => {
-	test("blackout sets the Blackout override code", async () => {
+	test("blackout sets the Blackout override (nested calendar is an array, multiplier required)", async () => {
 		const { client, calls } = recordingClient();
 		const { AvailabilityOps } = await import("../src/ops/availability.ts");
 		const ops = new AvailabilityOps(client);
-		await ops.blackout("r1", "2026-08-01");
+		await ops.blackout(1001, "2026-08-01");
 		expect(calls[0]!.endpoint).toBe("POST /inventory/rooms/calendar");
-		expect(calls[0]!.body).toEqual([{ roomId: "r1", date: "2026-08-01", o: OverrideCode.Blackout }]);
+		expect(calls[0]!.body).toEqual([
+			{ roomId: 1001, calendar: [{ from: "2026-08-01", to: "2026-08-01", multiplier: 1, override: OverrideCode.Blackout }] },
+		]);
 	});
 });

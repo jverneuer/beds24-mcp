@@ -1,7 +1,7 @@
 /**
  * Beds24 — the SDK/knowledge composition root for the server package.
  *
- * One object you configure once (`Beds24.create({ apiKey, propKey })`) and call
+ * One object you configure once (`Beds24.create({ refreshToken })`) and call
  * for everything: remote API calls (`.request()`), local doc search
  * (`.search()`), schema lookup (`.schema()`), validation (`.validate()`), and
  * domain workflows (`.booking`, `.pricing`, `.availability`, `.channels`,
@@ -37,6 +37,10 @@ import {
 	type Beds24Response,
 	type Field,
 	type ValidationResult,
+	type EndpointKey,
+	type OpOf,
+	type RequestBodyOf,
+	type ResponseBodyOf,
 } from "beds24-sdk-client";
 
 import {
@@ -161,13 +165,17 @@ export class Beds24 {
 		};
 	}
 
-	/** Direct pass-through to the API client for any documented endpoint. */
-	request<T = unknown>(
-		endpoint: string,
-		body?: unknown,
+	/**
+	 * Direct pass-through to the API client for any documented endpoint.
+	 * Typed like `Beds24Client.request`: the body and response are inferred
+	 * from the endpoint key, so callers get strict types for free.
+	 */
+	request<E extends EndpointKey>(
+		endpoint: E,
+		body?: RequestBodyOf<OpOf<E>>,
 		opts?: { idempotencyKey?: string; signal?: AbortSignal },
-	): Promise<Beds24Response<T>> {
-		return this.client.request<T>(endpoint, body, opts);
+	): Promise<Beds24Response<ResponseBodyOf<OpOf<E>>>> {
+		return this.client.request<E>(endpoint, body, opts);
 	}
 }
 
