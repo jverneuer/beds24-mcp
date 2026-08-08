@@ -1,4 +1,4 @@
-# Release workspace packages to npm — one independent version per package.
+# Release workspace packages to npm + GitHub Packages — one independent version per package.
 #
 # This is a 3-package npm-workspace monorepo. The root package is private and
 # is NOT published. Each workspace package versions and publishes on its own:
@@ -11,9 +11,8 @@
 #   - A PR that should bump a package ships a changeset (.changeset/*.md).
 #   - On push to main, changesets/action opens/updates a "Version Packages" PR
 #     that consumes any pending changesets and bumps the affected packages.
-#   - When that PR lands (no pending changesets left), the publish step runs
-#     `changeset publish`, which publishes ONLY the packages whose version
-#     advanced — the others are skipped.
+#     If no pending changesets remain, it publishes to npm directly.
+#   - A separate step publishes to GitHub Packages (npm.pkg.github.com).
 #
 # The server declares its siblings as `workspace:*` dependencies. npm rewrites
 # those to the concrete version at publish time; `updateInternalDependencies`
@@ -22,16 +21,12 @@
 # There is no shared version and no `v*.*.*` tag — each package carries its own
 # semver and is released when its own changes go out.
 #
-# Required secrets:
-#   NPM_TOKEN — an npm access token (Automation type, works with 2FA). Create it
-#   at https://npmjs.com -> Access Tokens -> Generate New Token -> Automation,
-#   then add it at https://github.com/jverneuer/beds24-mcp/settings/secrets/actions.
-#
-# Required permissions:
-#   contents: write + pull-requests: write — lets the action create and merge
-#     the Version Packages PR.
-#   id-token: write — lets npm attach provenance (links each package to this
-#     GitHub Actions run). Optional; drop `--provenance` if you don't want it.
+# Authentication:
+#   - npm: trusted publishing (OIDC) — no NPM_TOKEN secret needed. Configure a
+#     trusted publisher at https://npmjs.com for each package:
+#       Organization: jverneuer | Repo: beds24-mcp | Workflow: release.yml
+#       Environment: release
+#   - GitHub Packages: uses the automatic GITHUB_TOKEN.
 
 name: Release
 
@@ -39,11 +34,10 @@ on:
   push:
     branches: [main]
 
-# The action creates/merges the Version Packages PR, so it needs write access.
 permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
+  contents: write          # changesets/action creates/merges the Version Packages PR
+  pull-requests: write     # same
+  id-token: write          # npm trusted publishing (OIDC)
 
 # Never run two releases against main at once.
 concurrency:
@@ -53,6 +47,7 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment: release    # matches the trusted publisher environment on npmjs.com
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -80,6 +75,10 @@ jobs:
       # If pending changesets exist, this creates/updates the "Version Packages"
       # PR and does NOT publish. Once that PR merges (no pending changesets
       # left), the same step publishes the changed packages instead.
+      #
+      # Trusted publishing: changesets/action uses the GitHub OIDC token
+      # automatically when id-token: write is granted and NPM_TOKEN is unset.
+      # No NPM_TOKEN secret required.
       - name: Create Version Packages PR or Publish to npm
         id: changesets
         uses: changesets/action@v1
@@ -87,4 +86,42 @@ jobs:
           publish: bun changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # Publish to GitHub Packages. GitHub Packages requires scoped names, so
+      # we pack each published package, rewrite the name to @jverneuer/<name>,
+      # and publish the repacked tarball to npm.pkg.github.com.
+      - name: Publish to GitHub Packages
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> .npmrc
+          echo "@jverneuer:registry=https://npm.pkg.github.com" >> .npmrc
+
+          for pkg_dir in packages/sdk packages/knowledge packages/server; do
+            name=$(node -p "require('./$pkg_dir/package.json').name")
+            version=$(node -p "require('./$pkg_dir/package.json').version")
+            scoped="@jverneuer/$name"
+
+            echo "Publishing $scoped@$version to GitHub Packages..."
+
+            # Pack the built package
+            cd "$pkg_dir"
+            pack_file=$(npm pack --silent 2>/dev/null)
+            cd ..
+
+            # Extract, rewrite name, repack
+            mkdir -p /tmp/gpr-publish
+            rm -rf /tmp/gpr-publish/*
+            tar -xzf "$pkg_dir/$pack_file" -C /tmp/gpr-publish
+            node -e "
+              const fs = require('fs');
+              const p = '/tmp/gpr-publish/package/package.json';
+              const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+              j.name = '$scoped';
+              fs.writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
+            "
+            cd /tmp/gpr-publish/package
+            npm publish --registry https://npm.pkg.github.com
+            cd "$GITHUB_WORKSPACE"
+          done

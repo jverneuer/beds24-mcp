@@ -1,10 +1,36 @@
 {
   "name": "beds24-sdk-client",
   "version": "1.1.6",
-  "description": "Typed wrapper over the Beds24 V2 JSON API — HTTP client, OpenAPI schema validation, and typed domain workflows (bookings, pricing, availability, channels, webhooks).",
+  "description": "Typed wrapper over the Beds24 V2 JSON API — HTTP client, OpenAPI schema validation, and typed domain workflows (bookings, pricing, availability, channels, webhooks, inventory, accounts, properties, organizations, channel actions, reviews, Stripe).",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jverneuer/beds24-mcp",
+    "directory": "packages/sdk"
+  },
+  "homepage": "https://github.com/jverneuer/beds24-mcp/tree/main/packages/sdk",
+  "bugs": {
+    "url": "https://github.com/jverneuer/beds24-mcp/issues"
+  },
+  "keywords": [
+    "beds24",
+    "api",
+    "sdk",
+    "openapi",
+    "schema-validation",
+    "bookings",
+    "pricing",
+    "availability",
+    "channels",
+    "webhooks"
+  ],
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

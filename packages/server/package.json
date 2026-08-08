@@ -1,13 +1,39 @@
 {
   "name": "beds24-mcp-server",
   "version": "1.1.6",
-  "description": "MCP server + CLI host for Beds24 — depends on beds24-sdk-client and beds24-knowledge. Published package with the beds24-mcp-server bin.",
+  "description": "MCP server + CLI host for Beds24. Depends on beds24-sdk-client (typed API client) and beds24-knowledge (hybrid vector+FTS search). Exposes tools, prompts, and resources for an LLM via @modelcontextprotocol/sdk.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jverneuer/beds24-mcp",
+    "directory": "packages/server"
+  },
+  "homepage": "https://github.com/jverneuer/beds24-mcp/tree/main/packages/server",
+  "bugs": {
+    "url": "https://github.com/jverneuer/beds24-mcp/issues"
+  },
+  "keywords": [
+    "beds24",
+    "mcp",
+    "mcp-server",
+    "llm",
+    "ai",
+    "sdk",
+    "openapi",
+    "schema-validation",
+    "semantic-search",
+    "vector-index"
+  ],
   "type": "module",
   "bin": {
     "beds24-mcp-server": "dist/cli.mjs"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
