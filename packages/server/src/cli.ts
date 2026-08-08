@@ -13,17 +13,32 @@ import { buildIndex } from "beds24-knowledge";
 import { listEndpoints } from "beds24-sdk-client";
 import { startServer } from "./server.js";
 import { runSetup } from "./setup.js";
+import fs from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+/**
+ * Test-only override for the directory `moduleDir()` resolves to. Under Bun
+ * `import.meta.dir` is always populated for a real file, so the fileURLToPath
+ * fallback below can never run in tests — this lets unit tests exercise it
+ * deterministically. `undefined` in production, so behavior is unchanged.
+ */
+let baseDirOverride: string | undefined;
+
+/** Test-only: override the directory `moduleDir()` resolves to. */
+export function __setBaseDirForTests(dir: string | undefined): void {
+	baseDirOverride = dir;
+}
 
 /**
  * Directory of this module (Bun: import.meta.dir; Node: derived from
  * import.meta.url). Used to resolve the knowledge corpus relative to this
  * checkout without hard-coding a path from the repo root.
  */
-function moduleDir(): string {
-	if (typeof import.meta.dir === "string" && import.meta.dir.length > 0) {
-		return import.meta.dir;
+export function moduleDir(): string {
+	const dir = baseDirOverride ?? import.meta.dir;
+	if (typeof dir === "string" && dir.length > 0) {
+		return dir;
 	}
 	return dirname(fileURLToPath(import.meta.url));
 }
@@ -49,10 +64,6 @@ export function collectFlags(args: string[], flag: string): string[] {
 	return out;
 }
 
-const args = process.argv.slice(2);
-const command = args[0];
-const force = args.includes("--force");
-
 const knowledgeDir = defaultKnowledgeDir();
 
 /** Print a human-readable byte count. */
@@ -74,7 +85,6 @@ function printStatus(): void {
 	let dbSize = 0;
 	if (exists) {
 		try {
-			const fs = require("node:fs") as typeof import("node:fs");
 			dbSize = fs.statSync(DB_PATH).size;
 		} catch {
 			dbSize = 0;
@@ -85,7 +95,6 @@ function printStatus(): void {
 	let factsFiles = 0;
 	try {
 		endpointCount = listEndpoints().length;
-		const fs = require("node:fs") as typeof import("node:fs");
 		const walk = (d: string): number => {
 			let n = 0;
 			for (const e of fs.readdirSync(d, { withFileTypes: true })) {
@@ -109,7 +118,16 @@ function printStatus(): void {
 	console.log(`API endpoints:   ${endpointCount}`);
 }
 
-async function main(): Promise<void> {
+/**
+ * Run the CLI given an argv (already sliced past the program + script name —
+ * i.e. the same shape as `process.argv.slice(2)`). Extracted from `main` so the
+ * command dispatch is unit-testable without spawning a process: tests call this
+ * directly with a crafted argv and assert on the mocked knowledge/sdk calls.
+ */
+export async function runCli(args: string[]): Promise<void> {
+	const command = args[0];
+	const force = args.includes("--force");
+
 	if (command === "index" || command === undefined) {
 		console.error(`[beds24] building index from ${knowledgeDir} (force=${force})...`);
 		// Ensure the db connection is initialized before embedding.
@@ -150,7 +168,14 @@ async function main(): Promise<void> {
 	process.exit(1);
 }
 
-main().catch((err) => {
+async function main(): Promise<void> {
+	await runCli(process.argv.slice(2));
+}
+
+/** Top-level error handler for the CLI entrypoint. Exported for unit testing. */
+export function handleFatal(err: unknown): void {
 	console.error("[beds24] fatal:", err);
 	process.exit(1);
-});
+}
+
+main().catch(handleFatal);

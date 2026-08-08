@@ -10,5 +10,8 @@
     "allowImportingTsExtensions": false,
     "types": ["bun-types", "node"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  // Don't emit tests to dist/ — keeps `bun test` discovery clean and avoids
+  // shipping test files in the npm package (files: ["dist"]).
+  "exclude": ["src/**/*.test.ts"]
 }

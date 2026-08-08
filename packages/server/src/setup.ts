@@ -13,7 +13,21 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
 import { spawnSync } from "node:child_process";
+import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
+
+/**
+ * Test-only override for the directory `moduleDir()` resolves to. Under Bun
+ * `import.meta.dir` is always populated for a real file, so the fileURLToPath
+ * fallback below can never run in tests — this lets unit tests exercise it
+ * deterministically. `undefined` in production, so behavior is unchanged.
+ */
+let baseDirOverride: string | undefined;
+
+/** Test-only: override the directory `moduleDir()` resolves to. */
+export function __setBaseDirForTests(dir: string | undefined): void {
+	baseDirOverride = dir;
+}
 
 /**
  * Directory of this module (Bun: import.meta.dir; Node: derived from
@@ -21,10 +35,34 @@ import { fileURLToPath } from "node:url";
  * resolution is done against the module location instead of a repo-root helper.
  */
 function moduleDir(): string {
-	if (typeof import.meta.dir === "string" && import.meta.dir.length > 0) {
-		return import.meta.dir;
+	const dir = baseDirOverride ?? import.meta.dir;
+	if (typeof dir === "string" && dir.length > 0) {
+		return dir;
 	}
 	return dirname(fileURLToPath(import.meta.url));
+}
+
+/**
+ * Ask the user an interactive question; returns their trimmed answer, or null
+ * if stdin is non-interactive. Uses Node `readline` (no browser APIs) so the
+ * `beds24-mcp-server setup` interactive flow works in any terminal.
+ */
+export function prompt(message: string): string | null {
+	if (!isInteractive()) return null;
+	const rl = createInterface({ input: process.stdin, output: process.stdout, terminal: true });
+	let answer: string | null = null;
+	rl.question(message, (line) => {
+		answer = line;
+		rl.close();
+	});
+	return answer;
+}
+
+/** Ask an interactive yes/no question; returns false if non-interactive. */
+export function confirm(message: string): boolean {
+	const answer = prompt(message);
+	if (answer === null) return false;
+	return /^\s*y(es)?\s*$/i.test(answer.trim());
 }
 
 /**
@@ -33,7 +71,7 @@ function moduleDir(): string {
  * walking up from this module; the root is the only dir that has both a
  * package.json and a `packages/` directory.
  */
-function repoRoot(): string {
+export function repoRoot(): string {
 	let dir = moduleDir();
 	for (let i = 0; i < 8; i++) {
 		if (existsSync(join(dir, "package.json")) && existsSync(join(dir, "packages"))) {
@@ -269,7 +307,7 @@ function isInteractive(): boolean {
  * Ask the user which harnesses to configure. Pre-selects detected ones.
  * Returns null only when stdin is non-interactive and nothing was pre-selected.
  */
-function chooseInteractive(detected: Harness[]): string[] | null {
+async function chooseInteractive(detected: Harness[]): Promise<string[] | null> {
 	const found = detected.filter((h) => h.detected);
 	console.log("\nDetected harnesses:");
 	for (const h of detected) {
@@ -277,10 +315,12 @@ function chooseInteractive(detected: Harness[]): string[] | null {
 	}
 
 	if (found.length > 0) {
-		const all = confirm(`\nConfigure all ${found.length} detected harness?`);
+		const all = await confirm(`\nConfigure all ${found.length} detected harness?`);
 		if (all) return found.map((h) => h.id);
 
-		const pick = prompt("Which? (comma-separated names: claude, cursor, windsurf, vscode):");
+		const pick = await prompt(
+			"Which? (comma-separated names: claude, cursor, windsurf, vscode):",
+		);
 		if (pick && pick.trim()) {
 			return pick.split(",").map((s) => s.trim().toLowerCase());
 		}
@@ -288,7 +328,9 @@ function chooseInteractive(detected: Harness[]): string[] | null {
 	}
 
 	console.log("\nNone detected automatically — you can still pick manually.");
-	const pick = prompt("Configure which? (comma-separated: claude, cursor, windsurf, vscode):");
+	const pick = await prompt(
+		"Configure which? (comma-separated: claude, cursor, windsurf, vscode):",
+	);
 	if (pick && pick.trim()) {
 		return pick.split(",").map((s) => s.trim().toLowerCase());
 	}
@@ -296,7 +338,7 @@ function chooseInteractive(detected: Harness[]): string[] | null {
 }
 
 /** Validate requested harness ids, throwing on unknown ones. Throws on error. */
-function resolveTargets(requested: string[], all: Harness[]): Harness[] {
+export function resolveTargets(requested: string[], all: Harness[]): Harness[] {
 	const byId = new Map(all.map((h) => [h.id, h]));
 	const unknown = requested.filter((id) => !byId.has(id));
 	if (unknown.length > 0) {
@@ -305,7 +347,7 @@ function resolveTargets(requested: string[], all: Harness[]): Harness[] {
 	return requested.map((id) => byId.get(id) as Harness);
 }
 
-function runStep(label: string, args: string[], cwd: string): boolean {
+export function runStep(label: string, args: string[], cwd: string): boolean {
 	console.error(`\n[beds24] ${label}`);
 	const [cmd, ...rest] = args;
 	if (!cmd) {
@@ -339,7 +381,7 @@ export async function runSetup(opts: SetupOptions = {}): Promise<void> {
 	} else if (opts.all) {
 		targetIds = all.filter((h) => h.detected).map((h) => h.id);
 	} else if (isInteractive()) {
-		const chosen = chooseInteractive(all);
+		const chosen = await chooseInteractive(all);
 		if (chosen === null) {
 			console.log("Nothing selected — nothing to do.");
 			return;

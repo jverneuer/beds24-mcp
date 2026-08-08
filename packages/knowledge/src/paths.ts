@@ -16,10 +16,25 @@ import { fileURLToPath } from "node:url";
 // resolve paths relative to the package without re-adding that export.
 export { dirname };
 
+/**
+ * Test-only override for the directory `moduleDir()` resolves to. Under Bun
+ * `import.meta.dir` is always populated for a real file, so the fileURLToPath
+ * fallback below can never run in tests — this lets unit tests exercise it
+ * (and the `packageRoot()` fallback) deterministically. `undefined` in
+ * production, so behavior is unchanged.
+ */
+let baseDirOverride: string | undefined;
+
+/** Test-only: override the directory `moduleDir()` resolves to. */
+export function __setBaseDirForTests(dir: string | undefined): void {
+	baseDirOverride = dir;
+}
+
 /** Directory of the module that calls this (Bun: import.meta.dir; Node: derived). */
 export function moduleDir(): string {
-	if (typeof import.meta.dir === "string" && import.meta.dir.length > 0) {
-		return import.meta.dir;
+	const dir = baseDirOverride ?? import.meta.dir;
+	if (typeof dir === "string" && dir.length > 0) {
+		return dir;
 	}
 	return dirname(fileURLToPath(import.meta.url));
 }

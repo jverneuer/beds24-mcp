@@ -13,5 +13,8 @@
   "include": ["src/**/*.ts"],
   // The CLI is bundled separately by bun (see build script) into dist/cli.mjs
   // with a shebang; emit the library surface here, but not the CLI entrypoint.
-  "exclude": ["src/cli.ts"]
+  // Test files are excluded: emitting them to dist/ makes `bun test` discover
+  // stale dist/*.test.js alongside src/*.test.ts (cross-file mock pollution +
+  // broken import.meta.url paths) and would ship them in the npm package.
+  "exclude": ["src/cli.ts", "src/**/*.test.ts"]
 }

@@ -9,11 +9,23 @@
  * place.
  */
 
+import { createHash } from "node:crypto";
 import { readdirSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 
 import { chunkMarkdown, type Chunk } from "./markdown/chunk.js";
-import { countChunks, getDb, insertChunk, resetDatabase } from "./db.js";
+import {
+	countChunks,
+	deleteChunksForFile,
+	deleteStoredHash,
+	getAllTrackedFilePaths,
+	getDb,
+	getStoredHash,
+	insertChunk,
+	resetDatabase,
+	setStoredHash,
+} from "./db.js";
 import type { Bucket } from "./markdown/frontmatter.js";
 import { embed } from "./embed.js";
 
@@ -74,11 +86,28 @@ function readText(path: string): string {
 	return fs.readFileSync(path, "utf8");
 }
 
+/**
+ * SHA-256 hex digest of a file's raw bytes. Pure and testable: the indexer
+ * compares this against the stored hash to decide whether a file changed since
+ * the last run. Hashing raw bytes (not the decoded text) so a UTF-8 re-encode
+ * never produces a false "changed" signal.
+ */
+export async function fileHash(path: string): Promise<string> {
+	const buf = await readFile(path);
+	return createHash("sha-256").update(buf).digest("hex");
+}
+
 export interface BuildResult {
 	/** Number of markdown files indexed. */
 	files: number;
 	/** Total chunks written to the store. */
 	chunks: number;
+	/**
+	 * Files skipped on this run because their content hash matched the stored
+	 * one — their existing chunks + embeddings were reused unchanged. Lets
+	 * callers (and tests) verify the incremental path actually fired.
+	 */
+	unchanged?: number;
 }
 
 /**
@@ -99,18 +128,33 @@ export async function buildIndex(opts: {
 
 	if (force) {
 		// resetDatabase() (not clearChunks) so the schema + FTS5 are recreated —
-		// needed when the user_version bumps between builds.
+		// needed when the user_version bumps between builds. This also wipes
+		// indexed_files, so every file is re-embedded on the force pass.
 		console.error("[beds24] force: resetting database (schema + FTS)");
 		resetDatabase();
 	}
 
 	const files = walkMarkdown(root);
 	let totalChunks = 0;
+	let unchanged = 0;
 
 	// Process files one at a time; per-file embedding keeps memory flat and lets
 	// us print steady progress.
 	for (const fullPath of files) {
 		const sourceFile = relative(root, fullPath).split("\\").join("/");
+
+		// Incremental gate: hash the file and skip if it's unchanged since the
+		// last successful index. --force skips this check (resetDatabase already
+		// cleared the hash table above).
+		const hash = await fileHash(fullPath);
+		if (!force) {
+			const stored = getStoredHash(sourceFile);
+			if (stored !== undefined && stored === hash) {
+				unchanged++;
+				continue;
+			}
+		}
+
 		const markdown = readText(fullPath);
 
 		// bucketFromPath is the fallback; chunkMarkdown parses the frontmatter
@@ -119,8 +163,17 @@ export async function buildIndex(opts: {
 
 		if (chunks.length === 0) {
 			console.error(`  ${sourceFile}: 0 chunks (empty)`);
+			// The file exists but is empty (or parseable-to-nothing). Clear any
+			// stale chunks + hash so an empty file never lingers in the store.
+			deleteChunksForFile(sourceFile);
+			deleteStoredHash(sourceFile);
 			continue;
 		}
+
+		// Changed or brand-new file: drop its old chunks before re-inserting so
+		// a content edit can't leave orphaned chunks behind (and so re-runs
+		// don't silently double the store).
+		deleteChunksForFile(sourceFile);
 
 		const texts = chunks.map((c) => c.text);
 		const vectors = await embed(texts);
@@ -140,11 +193,32 @@ export async function buildIndex(opts: {
 			);
 		}
 
+		// Remember the hash only AFTER a successful (re-)embed, so a failed run
+		// leaves the file indexed as "changed" on the next attempt.
+		setStoredHash(sourceFile, hash, chunks.length);
 		totalChunks += chunks.length;
 		console.error(`  ${sourceFile}: ${chunks.length} chunks`);
 	}
 
+	// Stale cleanup: files that were indexed in a previous run but no longer
+	// exist on disk. Evict their chunks + hash record so the store tracks the
+	// live corpus exactly. Mirrors Turso's indexed_files cleanup step.
+	if (!force) {
+		const livePaths = new Set(
+			files.map((f) => relative(root, f).split("\\").join("/")),
+		);
+		for (const tracked of getAllTrackedFilePaths()) {
+			if (!livePaths.has(tracked)) {
+				deleteChunksForFile(tracked);
+				deleteStoredHash(tracked);
+				console.error(`  ${tracked}: removed (no longer on disk)`);
+			}
+		}
+	}
+
 	const indexed = countChunks();
-	console.error(`[beds24] indexed ${files.length} files, ${totalChunks} chunks (store has ${indexed})`);
-	return { files: files.length, chunks: totalChunks };
+	console.error(
+		`[beds24] indexed ${files.length} files, ${totalChunks} chunks (store has ${indexed}); ${unchanged} unchanged`,
+	);
+	return { files: files.length, chunks: totalChunks, unchanged };
 }

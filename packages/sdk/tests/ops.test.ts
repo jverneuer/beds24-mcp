@@ -56,6 +56,24 @@ describe("BookingOps", () => {
 		expect(calls[0]!.endpoint).toBe("GET /bookings");
 		expect(calls[0]!.body).toEqual({ status: ["cancelled", "confirmed"] });
 	});
+
+	test("update wraps a partial draft in an array and targets POST /bookings", async () => {
+		const { client, calls } = recordingClient();
+		const { BookingOps } = await import("../src/ops/booking.ts");
+		const ops = new BookingOps(client);
+		await ops.update({ id: 42, firstName: "Ada" });
+		expect(calls[0]!.endpoint).toBe("POST /bookings");
+		expect(calls[0]!.body).toEqual([{ id: 42, firstName: "Ada" }]);
+	});
+
+	test("getById reads a single booking by id", async () => {
+		const { client, calls } = recordingClient();
+		const { BookingOps } = await import("../src/ops/booking.ts");
+		const ops = new BookingOps(client);
+		await ops.getById(7);
+		expect(calls[0]!.endpoint).toBe("GET /bookings");
+		expect(calls[0]!.body).toEqual({ id: [7] });
+	});
 });
 
 describe("PricingOps", () => {
@@ -78,6 +96,33 @@ describe("PricingOps", () => {
 		expect(model).toBe(CHANNEL_PRICE_MODEL.Airbnb);
 		expect(calls[0]!.endpoint).toBe("POST /inventory/rooms/calendar");
 	});
+
+	test("getCalendar targets GET /inventory/rooms/calendar", async () => {
+		const { client, calls } = recordingClient();
+		const { PricingOps } = await import("../src/ops/pricing.ts");
+		const ops = new PricingOps(client);
+		await ops.getCalendar({ startDate: "2026-08-01", endDate: "2026-08-05" });
+		expect(calls[0]!.endpoint).toBe("GET /inventory/rooms/calendar");
+		expect(calls[0]!.body).toEqual({ startDate: "2026-08-01", endDate: "2026-08-05" });
+	});
+
+	test("setFixedPrices wraps a single row and targets POST /inventory/fixedPrices", async () => {
+		const { client, calls } = recordingClient();
+		const { PricingOps } = await import("../src/ops/pricing.ts");
+		const ops = new PricingOps(client);
+		await ops.setFixedPrices({ roomId: 1001, firstNight: "2026-08-01", lastNight: "2026-08-05" });
+		expect(calls[0]!.endpoint).toBe("POST /inventory/fixedPrices");
+		expect(calls[0]!.body).toEqual([{ roomId: 1001, firstNight: "2026-08-01", lastNight: "2026-08-05" }]);
+	});
+
+	test("getFixedPrices targets GET /inventory/fixedPrices (default empty query)", async () => {
+		const { client, calls } = recordingClient();
+		const { PricingOps } = await import("../src/ops/pricing.ts");
+		const ops = new PricingOps(client);
+		await ops.getFixedPrices();
+		expect(calls[0]!.endpoint).toBe("GET /inventory/fixedPrices");
+		expect(calls[0]!.body).toEqual({});
+	});
 });
 
 describe("AvailabilityOps", () => {
@@ -89,6 +134,26 @@ describe("AvailabilityOps", () => {
 		expect(calls[0]!.endpoint).toBe("POST /inventory/rooms/calendar");
 		expect(calls[0]!.body).toEqual([
 			{ roomId: 1001, calendar: [{ from: "2026-08-01", to: "2026-08-01", multiplier: 1, override: OverrideCode.Blackout }] },
+		]);
+	});
+
+	test("get targets GET /inventory/rooms/availability", async () => {
+		const { client, calls } = recordingClient();
+		const { AvailabilityOps } = await import("../src/ops/availability.ts");
+		const ops = new AvailabilityOps(client);
+		await ops.get({ startDate: "2026-08-01", endDate: "2026-08-05" });
+		expect(calls[0]!.endpoint).toBe("GET /inventory/rooms/availability");
+		expect(calls[0]!.body).toEqual({ startDate: "2026-08-01", endDate: "2026-08-05" });
+	});
+
+	test("sync wraps a single row and targets POST /inventory/rooms/calendar", async () => {
+		const { client, calls } = recordingClient();
+		const { AvailabilityOps } = await import("../src/ops/availability.ts");
+		const ops = new AvailabilityOps(client);
+		await ops.sync({ roomId: 1001, calendar: [{ from: "2026-08-01", to: "2026-08-05", multiplier: 1 }] });
+		expect(calls[0]!.endpoint).toBe("POST /inventory/rooms/calendar");
+		expect(calls[0]!.body).toEqual([
+			{ roomId: 1001, calendar: [{ from: "2026-08-01", to: "2026-08-05", multiplier: 1 }] },
 		]);
 	});
 });

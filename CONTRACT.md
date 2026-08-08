@@ -1,9 +1,17 @@
-# Cross-package interface contract (read-only — both engineers honor this)
+# Cross-package interface contract (FROZEN — all subagents honor this)
 
-The `beds24-sdk-client` and `beds24-knowledge` packages are built by two engineers in
+The `beds24-sdk-client` and `beds24-knowledge` packages are built by subagents in
 parallel. They MUST expose exactly these shapes so the server package composes
 them without adaptation. Do not change signatures without updating this file and
-telling the integration engineer.
+telling the integration engineer (orchestrator).
+
+**Freeze status (2026-08-04):** the signatures below are frozen for the current
+surface. Task T8 will ADD new ops classes (InvoicingOps, OffersOps, InventoryOps,
+AccountsOps, PropertiesOps, OrganizationsOps, ChannelActionsOps, ReviewsOps,
+StripeOps) following the SAME pattern — `constructor(client: Beds24Client)`, types
+derived from the generated schemas, methods wrapping `client.request(...)`. Their
+exact method signatures are defined by T8 and appended here on completion. Until
+then, all other signatures are immutable.
 
 ## Bucket type (owned by `beds24-knowledge`, re-exported)
 
@@ -119,6 +127,19 @@ export class PricingOps { constructor(client: Beds24Client); ... }
 export class AvailabilityOps { constructor(client: Beds24Client); ... }
 export class ChannelsOps { constructor(client: Beds24Client); ... }
 export class WebhooksOps { constructor(client: Beds24Client); ... }
+// New ops (T8) — booking sub-resources
+export class MessageOps { constructor(client: Beds24Client); list(query?): Promise<Beds24Response<MessageListResponse>>; create(drafts: MessageWrite | MessageWrite[]): Promise<Beds24Response<MessageWriteResponse>>; update(patch: MessagePatchBody): Promise<Beds24Response<MessagePatchResponse>>; }
+export class InvoicingOps { constructor(client: Beds24Client); list(query?): Promise<Beds24Response<InvoiceListResponse>>; }
+// New ops (T8) — inventory reads
+export class InventoryOps { constructor(client: Beds24Client); getOffers(query: OffersQuery): Promise<Beds24Response<OffersResponse>>; getUnitBookings(query?: UnitBookingsQuery): Promise<Beds24Response<UnitBookingsResponse>>; }
+// New ops (T8) — accounts, properties, rooms, organizations
+export class AccountOps { constructor(client: Beds24Client); list(query: AccountQuery): Promise<Beds24Response<AccountListResponse>>; create(drafts: AccountDraft | AccountDraft[]): Promise<Beds24Response<AccountWriteResponse>>; }
+export class PropertyOps { constructor(client: Beds24Client); list(query: PropertyQuery): Promise<Beds24Response<PropertyListResponse>>; create(drafts: PropertyDraft | PropertyDraft[]): Promise<Beds24Response<PropertyWriteResponse>>; remove(ids: number[]): Promise<Beds24Response<PropertyDeleteResponse>>; listRooms(query: RoomQuery): Promise<Beds24Response<RoomListResponse>>; removeRoom(ids: number[]): Promise<Beds24Response<RoomDeleteResponse>>; }
+export class OrganizationOps { constructor(client: Beds24Client); listUsers(query?: OrganizationUserQuery): Promise<Beds24Response<OrganizationUserListResponse>>; }
+// New ops (T8) — channel actions, reviews, Stripe
+export class ChannelActionsOps { constructor(client: Beds24Client); pushToAirbnb(drafts: AirbnbAction | AirbnbAction[]): Promise<Beds24Response<AirbnbActionResponse>>; pushToBookingCom(drafts: BookingAction | BookingAction[]): Promise<Beds24Response<BookingActionResponse>>; }
+export class ReviewsOps { constructor(client: Beds24Client); getAirbnbUsers(query?: AirbnbUsersQuery): Promise<Beds24Response<AirbnbUsersResponse>>; getAirbnbReviews(query: AirbnbReviewsQuery): Promise<Beds24Response<AirbnbReviewsResponse>>; getBookingComReviews(query: BookingReviewsQuery): Promise<Beds24Response<BookingReviewsResponse>>; }
+export class StripeOps { constructor(client: Beds24Client); setupStripe(drafts: StripeAction | StripeAction[]): Promise<Beds24Response<StripeActionResponse>>; getStripePaymentMethods(query: StripePaymentMethodsQuery): Promise<Beds24Response<StripePaymentMethodsResponse>>; getStripeCharges(query: StripeChargesQuery): Promise<Beds24Response<StripeChargesResponse>>; }
 ```
 
 ## Boundary rules (enforced by QA)

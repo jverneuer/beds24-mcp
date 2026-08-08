@@ -23,7 +23,12 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && bun build src/cli.ts --target node --packages=external --outfile dist/cli.mjs --banner '#!/usr/bin/env node' && chmod +x dist/cli.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "serve": "bun run src/server.ts",
+    "index": "bun run src/cli.ts index",
+    "reindex": "bun run src/cli.ts index --force",
+    "status": "bun run src/cli.ts status",
+    "setup": "bun run src/cli.ts setup"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.10.0",

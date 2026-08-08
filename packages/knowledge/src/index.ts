@@ -17,7 +17,7 @@ export type { Bucket, Frontmatter } from "./markdown/frontmatter.js";
 
 export { chunkMarkdown, type Chunk } from "./markdown/chunk.js";
 
-export { buildIndex, type BuildResult } from "./indexer.js";
+export { buildIndex, fileHash, type BuildResult } from "./indexer.js";
 
 export {
 	getDb,
@@ -27,6 +27,11 @@ export {
 	countChunks,
 	bucketCounts,
 	insertChunk,
+	deleteChunksForFile,
+	getStoredHash,
+	setStoredHash,
+	deleteStoredHash,
+	getAllTrackedFilePaths,
 	DB_PATH,
 	EMBED_DIM,
 } from "./db.js";
@@ -42,4 +47,5 @@ export {
 } from "./search.js";
 export type { SearchHit, HybridSearchOpts } from "./search.js";
 
-export { embed } from "./embed.js";
+export { embed, LocalEmbedder, OllamaEmbedder, createEmbedder, __resetEmbedderForTests } from "./embed.js";
+export type { Embedder, EmbedderOpts } from "./embed.js";
