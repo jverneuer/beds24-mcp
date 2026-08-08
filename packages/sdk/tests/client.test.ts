@@ -4,8 +4,11 @@
  * without a network.
  */
 
-import { test, expect, describe, beforeEach } from "bun:test";
+import { test, expect, describe, beforeEach, afterEach } from "bun:test";
 import { Beds24Client, Beds24Error, ErrorCode } from "../src/client.ts";
+
+/** Capture the real fetch once, before any test replaces it. */
+const ORIGINAL_FETCH = globalThis.fetch;
 
 /** Install a controllable mock of global.fetch. */
 let mockFetch: ReturnType<typeof createMockFetch>;
@@ -47,6 +50,10 @@ function createMockFetch() {
 beforeEach(() => {
 	mockFetch = createMockFetch();
 	globalThis.fetch = mockFetch.fn;
+});
+
+afterEach(() => {
+	globalThis.fetch = ORIGINAL_FETCH;
 });
 
 function jsonResponse(body: unknown, init?: ResponseInit): Response {

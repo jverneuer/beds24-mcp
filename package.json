@@ -38,7 +38,7 @@
     "status": "bun run packages/server/src/cli.ts status",
     "setup": "bun run packages/server/src/cli.ts setup",
     "typecheck": "tsc --noEmit",
-    "test": "bun test",
+    "test": "bun test --isolate",
     "changeset": "changeset",
     "fetch-spec": "bun run scripts/fetch-spec.ts",
     "generate-types": "bun run scripts/generate-types.ts",
@@ -59,7 +59,6 @@
     "beds24-sdk-client": "workspace:*",
     "js-yaml": "^4.1.0",
     "libsql": "^0.4.0",
-    "openapi-fetch": "^0.17.0",
     "sqlite-vec": "^0.1.7",
     "zod": "^3.23.0"
   },

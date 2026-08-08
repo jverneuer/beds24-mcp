@@ -1,7 +1,7 @@
 # Continuous integration — typecheck + test on every push and PR.
 #
 # This is the fast gate that runs on every change. Publishing has its own
-# workflow (publish.yml) that runs on tags.
+# workflow (release.yml) that runs on push to main via changesets/action.
 
 name: CI
 
@@ -33,4 +33,4 @@ jobs:
         run: bun run typecheck
 
       - name: Test
-        run: bun test
+        run: bun test --isolate

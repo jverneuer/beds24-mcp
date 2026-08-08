@@ -75,7 +75,7 @@ jobs:
         run: node packages/server/dist/cli.mjs status
 
       - name: Test
-        run: bun test
+        run: bun test --isolate
 
       # If pending changesets exist, this creates/updates the "Version Packages"
       # PR and does NOT publish. Once that PR merges (no pending changesets
