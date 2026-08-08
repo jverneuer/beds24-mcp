@@ -1,6 +1,6 @@
 {
   "name": "@jverneuer/beds24-mcp-server",
-  "version": "1.1.6",
+  "version": "1.2.0",
   "description": "MCP server + CLI host for Beds24. Depends on beds24-sdk-client (typed API client) and beds24-knowledge (hybrid vector+FTS search). Exposes tools, prompts, and resources for an LLM via @modelcontextprotocol/sdk.",
   "license": "MIT",
   "repository": {
