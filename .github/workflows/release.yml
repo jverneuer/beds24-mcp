@@ -118,6 +118,6 @@ jobs:
             echo "Publishing $name@$version to GitHub Packages..."
 
             cd "$pkg_dir"
-            npm publish --registry https://npm.pkg.github.com
+            npm publish --registry https://npm.pkg.github.com --no-provenance
             cd "$GITHUB_WORKSPACE"
           done
