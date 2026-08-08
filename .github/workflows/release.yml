@@ -101,9 +101,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # Publish to GitHub Packages. GitHub Packages requires scoped names, so
-      # we pack each published package, rewrite the name to @jverneuer/<name>,
-      # and publish the repacked tarball to npm.pkg.github.com.
+      # Publish to GitHub Packages. Packages are already scoped under
+      # @jverneuer/*, so just pack and publish directly to npm.pkg.github.com.
       - name: Publish to GitHub Packages
         if: steps.changesets.outputs.published == 'true'
         env:
@@ -115,27 +114,10 @@ jobs:
           for pkg_dir in packages/sdk packages/knowledge packages/server; do
             name=$(node -p "require('./$pkg_dir/package.json').name")
             version=$(node -p "require('./$pkg_dir/package.json').version")
-            scoped="@jverneuer/$name"
 
-            echo "Publishing $scoped@$version to GitHub Packages..."
+            echo "Publishing $name@$version to GitHub Packages..."
 
-            # Pack the built package
             cd "$pkg_dir"
-            pack_file=$(npm pack --silent 2>/dev/null)
-            cd ..
-
-            # Extract, rewrite name, repack
-            mkdir -p /tmp/gpr-publish
-            rm -rf /tmp/gpr-publish/*
-            tar -xzf "$pkg_dir/$pack_file" -C /tmp/gpr-publish
-            node -e "
-              const fs = require('fs');
-              const p = '/tmp/gpr-publish/package/package.json';
-              const j = JSON.parse(fs.readFileSync(p, 'utf8'));
-              j.name = '$scoped';
-              fs.writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
-            "
-            cd /tmp/gpr-publish/package
             npm publish --registry https://npm.pkg.github.com
             cd "$GITHUB_WORKSPACE"
           done
