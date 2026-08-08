@@ -15,7 +15,11 @@
     "baseUrl": ".",
     "paths": {
       "zod": ["./node_modules/.bun/zod@4.4.3/node_modules/zod/v4"],
-      "zod/*": ["./node_modules/.bun/zod@4.4.3/node_modules/zod/v4/*"]
+      "zod/*": ["./node_modules/.bun/zod@4.4.3/node_modules/zod/v4/*"],
+      "beds24-knowledge": ["./packages/knowledge/src/index.ts"],
+      "beds24-knowledge/*": ["./packages/knowledge/src/*"],
+      "beds24-sdk-client": ["./packages/sdk/src/index.ts"],
+      "beds24-sdk-client/*": ["./packages/sdk/src/*"]
     },
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
