@@ -8,9 +8,9 @@
  * beds24-sdk-client workspace packages — this file only parses argv and prints.
  */
 
-import { countChunks, dbExists, getDb, DB_PATH } from "beds24-knowledge";
-import { buildIndex } from "beds24-knowledge";
-import { listEndpoints } from "beds24-sdk-client";
+import { countChunks, dbExists, getDb, DB_PATH } from "@jverneuer/beds24-knowledge";
+import { buildIndex } from "@jverneuer/beds24-knowledge";
+import { listEndpoints } from "@jverneuer/beds24-sdk-client";
 import { startServer } from "./server.js";
 import { runSetup } from "./setup.js";
 import fs from "node:fs";

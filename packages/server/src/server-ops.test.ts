@@ -12,7 +12,7 @@
 import { test, expect, describe, beforeEach, mock } from "bun:test";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { Beds24Client } from "beds24-sdk-client";
+import type { Beds24Client } from "@jverneuer/beds24-sdk-client";
 
 // ---------------------------------------------------------------------------
 // server.ts computes its module-level KNOWLEDGE_DIR from the env var +
@@ -26,7 +26,7 @@ import type { Beds24Client } from "beds24-sdk-client";
 const KNOWLEDGE_DIR = join(tmpdir(), "beds24-mcp-test-knowledge");
 const FAKE_DB_PATH = join(tmpdir(), "beds24-mcp-test-index.db");
 
-mock.module("beds24-knowledge", () => ({
+mock.module("@jverneuer/beds24-knowledge", () => ({
 	search: mock(async () => []),
 	searchAll: mock(async () => []),
 	searchInBucket: mock(async () => []),
@@ -95,7 +95,7 @@ class MockBeds24Client {
 	}
 }
 
-mock.module("beds24-sdk-client", () => ({
+mock.module("@jverneuer/beds24-sdk-client", () => ({
 	Beds24Client: MockBeds24Client as unknown as typeof Beds24Client,
 	BookingOps: MockBookingOps,
 	PricingOps: MockPricingOps,

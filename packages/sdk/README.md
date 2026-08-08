@@ -23,7 +23,7 @@ Requires Node ≥ 24 (uses global `fetch`). The package ships its own copy of `a
 ## Quickstart
 
 ```ts
-import { Beds24Client, BookingOps } from "beds24-sdk-client";
+import { Beds24Client, BookingOps } from "@jverneuer/beds24-sdk-client";
 
 const client = new Beds24Client({ refreshToken: process.env.BEDS24_REFRESH_TOKEN });
 const booking = new BookingOps(client);
@@ -103,7 +103,7 @@ const fields = flattenObject(getSchema("POST /bookings", "request"));
 Without calling the API, validate a draft payload against the bundled schema:
 
 ```ts
-import { Beds24Validator } from "beds24-sdk-client";
+import { Beds24Validator } from "@jverneuer/beds24-sdk-client";
 
 const v = Beds24Validator.create();
 const result = v.validate("POST /bookings", "request", draft);
@@ -120,22 +120,22 @@ Errors are LLM-actionable: `required field missing`, `unknown field (did you mea
 ## Exports
 
 ```ts
-import { Beds24Client, Beds24Error, Scopes, ErrorCode } from "beds24-sdk-client";
-import type { Beds24ClientConfig, Beds24Response, Credits, Scope } from "beds24-sdk-client";
+import { Beds24Client, Beds24Error, Scopes, ErrorCode } from "@jverneuer/beds24-sdk-client";
+import type { Beds24ClientConfig, Beds24Response, Credits, Scope } from "@jverneuer/beds24-sdk-client";
 
 // generated-type helpers
-import type { EndpointKey, OpOf, RequestBodyOf, ResponseBodyOf, paths, components } from "beds24-sdk-client";
+import type { EndpointKey, OpOf, RequestBodyOf, ResponseBodyOf, paths, components } from "@jverneuer/beds24-sdk-client";
 
 // ops + their types
-import { BookingOps, BookingStatus, PricingOps, AvailabilityOps, ... } from "beds24-sdk-client";
+import { BookingOps, BookingStatus, PricingOps, AvailabilityOps, ... } from "@jverneuer/beds24-sdk-client";
 
 // validation
-import { Beds24Validator, validateRequest } from "beds24-sdk-client";
-import type { ValidationError, ValidationResult } from "beds24-sdk-client";
+import { Beds24Validator, validateRequest } from "@jverneuer/beds24-sdk-client";
+import type { ValidationError, ValidationResult } from "@jverneuer/beds24-sdk-client";
 
 // schema introspection
-import { getSchema, listEndpoints, resolveSchema, flattenObject } from "beds24-sdk-client";
-import type { Field, EndpointSchema } from "beds24-sdk-client";
+import { getSchema, listEndpoints, resolveSchema, flattenObject } from "@jverneuer/beds24-sdk-client";
+import type { Field, EndpointSchema } from "@jverneuer/beds24-sdk-client";
 ```
 
 Subpath exports: `"beds24-sdk-client/client"`, `"/ops"`, `"/validate"`, `"/schema"`, `"/types"`.

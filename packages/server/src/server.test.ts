@@ -11,8 +11,8 @@ import { test, expect, describe, beforeEach, afterEach, mock } from "bun:test";
 import { rmSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { Bucket } from "beds24-knowledge";
-import type { Field } from "beds24-sdk-client";
+import type { Bucket } from "@jverneuer/beds24-knowledge";
+import type { Field } from "@jverneuer/beds24-sdk-client";
 
 // ---------------------------------------------------------------------------
 // Real temp directory for fs-backed handlers (resource list/read + status walk
@@ -55,7 +55,7 @@ const bucketCountsMock = mock(
 	() => ({ deprecated: 0, apiv1: 0, apiv2: 0, general: 0 }) as Record<Bucket, number>,
 );
 
-mock.module("beds24-knowledge", () => ({
+mock.module("@jverneuer/beds24-knowledge", () => ({
 	search: searchMock,
 	searchAll: searchAllMock,
 	searchInBucket: searchInBucketMock,
@@ -92,7 +92,7 @@ class MockBeds24Client {
 	constructor(_config: unknown) {}
 }
 
-mock.module("beds24-sdk-client", () => ({
+mock.module("@jverneuer/beds24-sdk-client", () => ({
 	getSchema: getSchemaMock,
 	listEndpoints: listEndpointsMock,
 	flattenObject: flattenObjectMock,

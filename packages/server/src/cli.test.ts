@@ -32,14 +32,14 @@ const fsExistsSync = mock((_p: string) => false);
 const fsStatSync = mock((_p: string) => ({ size: 1024 }));
 const fsReaddirSync = mock((_p: string): ReturnType<typeof fs.readdirSync> => []);
 
-mock.module("beds24-knowledge", () => ({
+mock.module("@jverneuer/beds24-knowledge", () => ({
 	buildIndex,
 	dbExists,
 	countChunks,
 	getDb,
 	DB_PATH,
 }));
-mock.module("beds24-sdk-client", () => ({
+mock.module("@jverneuer/beds24-sdk-client", () => ({
 	listEndpoints,
 }));
 // The MCP server entry (server.ts) is T10's domain — stub its startServer so the

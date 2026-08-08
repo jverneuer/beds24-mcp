@@ -1,5 +1,5 @@
 ---
-"beds24-sdk-client": minor
+"@jverneuer/beds24-sdk-client": minor
 ---
 
 Add typed domain ops for the full V2 surface and drop the dead `openapi-fetch` dev dependency.

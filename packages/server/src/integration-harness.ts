@@ -25,10 +25,10 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { SearchHit } from "beds24-knowledge";
-import type { Field } from "beds24-sdk-client";
+import type { SearchHit } from "@jverneuer/beds24-knowledge";
+import type { Field } from "@jverneuer/beds24-sdk-client";
 
-import { buildIndex, search, searchAll, searchInBucket } from "beds24-knowledge";
+import { buildIndex, search, searchAll, searchInBucket } from "@jverneuer/beds24-knowledge";
 
 // knowledge computes DB_PATH from this env var at import time — set before the
 // knowledge import so the real module opens the :memory: db we use.

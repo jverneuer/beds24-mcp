@@ -1,5 +1,5 @@
 {
-  "name": "beds24-knowledge",
+  "name": "@jverneuer/beds24-knowledge",
   "version": "1.1.6",
   "description": "Knowledge processing, vector+FTS indexing, and hybrid search over the Beds24 documentation corpus. libsql + sqlite-vec + local embeddings via @huggingface/transformers.",
   "license": "MIT",

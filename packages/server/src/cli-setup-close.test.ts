@@ -96,14 +96,14 @@ mock.module("node:readline", () => ({
 	}),
 }));
 
-mock.module("beds24-knowledge", () => ({
+mock.module("@jverneuer/beds24-knowledge", () => ({
 	buildIndex,
 	dbExists,
 	countChunks,
 	getDb,
 	DB_PATH,
 }));
-mock.module("beds24-sdk-client", () => ({
+mock.module("@jverneuer/beds24-sdk-client", () => ({
 	listEndpoints,
 }));
 mock.module("./server.js", () => ({

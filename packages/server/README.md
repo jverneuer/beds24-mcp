@@ -51,8 +51,8 @@ The server auto-indexes on startup if `.beds24/index.db` is missing, so `bun run
 The SDK has no MCP dependency — just point it at the facts + yaml:
 
 ```ts
-import { Beds24Validator, Beds24Search } from "beds24-sdk-client";     // validation only
-import { Beds24Client, BookingOps } from "beds24-sdk-client";          // full client
+import { Beds24Validator, Beds24Search } from "@jverneuer/beds24-sdk-client";     // validation only
+import { Beds24Client, BookingOps } from "@jverneuer/beds24-sdk-client";          // full client
 
 const validator = Beds24Validator.create();
 const result = await validator.validate("POST /bookings", "request", payload);
@@ -64,7 +64,7 @@ This lets you run schema validation from a Dagster asset, an Inngest function, o
 ## Using the client directly
 
 ```ts
-import { Beds24Client } from "beds24-sdk-client";
+import { Beds24Client } from "@jverneuer/beds24-sdk-client";
 
 const client = new Beds24Client({ refreshToken });
 const { data, credits } = await client.request("GET /bookings", {

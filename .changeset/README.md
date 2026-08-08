@@ -20,7 +20,7 @@ major), then writes a file like `.changeset/bold-otters-cheer.md`:
 
 ```md
 ---
-"beds24-sdk-client": minor
+"@jverneuer/beds24-sdk-client": minor
 ---
 
 Make SDK strictly typed against generated OpenAPI types

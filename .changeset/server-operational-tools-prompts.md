@@ -1,5 +1,5 @@
 ---
-"beds24-mcp-server": minor
+"@jverneuer/beds24-mcp-server": minor
 ---
 
 Add the OPERATE surface to the MCP server: per-request `Beds24Client`-backed operational tools, workflow prompts, server instructions, and full tool/prompt/resource test coverage. Remove the dead `beds24.ts` facade — server.ts now composes the workspace packages directly.

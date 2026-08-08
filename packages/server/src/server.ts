@@ -29,8 +29,8 @@ import {
 	countChunks,
 	bucketCounts,
 	DB_PATH,
-} from "beds24-knowledge";
-import type { Bucket } from "beds24-knowledge";
+} from "@jverneuer/beds24-knowledge";
+import type { Bucket } from "@jverneuer/beds24-knowledge";
 
 import {
 	getSchema,
@@ -50,9 +50,9 @@ import {
 	InvoicingOps,
 	ChannelActionsOps,
 	StripeOps,
-} from "beds24-sdk-client";
-import type { Field } from "beds24-sdk-client";
-import type { Beds24Response, BookingCreate, CalendarWrite, FixedPriceWrite, MessageWrite, ChannelSettings, WebhookPayload, InvoiceQuery, AirbnbAction, StripeAction } from "beds24-sdk-client";
+} from "@jverneuer/beds24-sdk-client";
+import type { Field } from "@jverneuer/beds24-sdk-client";
+import type { Beds24Response, BookingCreate, CalendarWrite, FixedPriceWrite, MessageWrite, ChannelSettings, WebhookPayload, InvoiceQuery, AirbnbAction, StripeAction } from "@jverneuer/beds24-sdk-client";
 
 /**
  * Knowledge corpus root. The package does not currently export its path helper,

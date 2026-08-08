@@ -30,7 +30,7 @@ type PromptExtra = RequestHandlerExtra<Request, Notification>;
 const KNOWLEDGE_DIR = join(tmpdir(), "beds24-mcp-test-knowledge");
 const FAKE_DB_PATH = join(tmpdir(), "beds24-mcp-test-index.db");
 
-mock.module("beds24-knowledge", () => ({
+mock.module("@jverneuer/beds24-knowledge", () => ({
 	search: mock(async () => []),
 	searchAll: mock(async () => []),
 	searchInBucket: mock(async () => []),
@@ -54,7 +54,7 @@ class MockBookingOps {
 	get = bookingGet;
 }
 
-mock.module("beds24-sdk-client", () => ({
+mock.module("@jverneuer/beds24-sdk-client", () => ({
 	Beds24Client: MockBeds24Client as unknown as typeof import("beds24-sdk-client").Beds24Client,
 	BookingOps: MockBookingOps,
 	PricingOps: class {},

@@ -23,7 +23,7 @@ Requires Node ≥ 24 (uses global `fetch` for the optional Ollama embed path; th
 ## Quickstart
 
 ```ts
-import { buildIndex, search, searchAll, searchInBucket, hybridSearch } from "beds24-knowledge";
+import { buildIndex, search, searchAll, searchInBucket, hybridSearch } from "@jverneuer/beds24-knowledge";
 
 // One-time (~30s) — builds .beds24/index.db from the bundled knowledge/ corpus.
 await buildIndex({ knowledgeDir: "./knowledge" });
@@ -100,7 +100,7 @@ Constants: `RRF_K = 60`, `DEFAULT_TOP_K = 8`, default `candidateK = max(topK * 5
 ### Indexing
 
 ```ts
-import { buildIndex } from "beds24-knowledge";
+import { buildIndex } from "@jverneuer/beds24-knowledge";
 
 const { files, chunks } = await buildIndex({
   knowledgeDir: "./knowledge",
@@ -117,7 +117,7 @@ The DB is opened lazily on first use (`getDb()`), and the server auto-indexes on
 ## Embedding
 
 ```ts
-import { embed, EMBED_DIM } from "beds24-knowledge";
+import { embed, EMBED_DIM } from "@jverneuer/beds24-knowledge";
 
 const [vec] = await embed(["hello world"]);
 // vec: number[384] — mean-pooled, unit-normalized (so cosine distance == cosine similarity)
@@ -133,31 +133,31 @@ Override the knowledge root with `BEDS24_KNOWLEDGE_DIR`; the default is the bund
 
 ```ts
 // search
-import { search, searchAll, searchInBucket, hybridSearch, Beds24Search } from "beds24-knowledge";
-import type { SearchHit, HybridSearchOpts } from "beds24-knowledge";
+import { search, searchAll, searchInBucket, hybridSearch, Beds24Search } from "@jverneuer/beds24-knowledge";
+import type { SearchHit, HybridSearchOpts } from "@jverneuer/beds24-knowledge";
 
 // indexing
-import { buildIndex } from "beds24-knowledge";
-import type { BuildResult } from "beds24-knowledge";
+import { buildIndex } from "@jverneuer/beds24-knowledge";
+import type { BuildResult } from "@jverneuer/beds24-knowledge";
 
 // db + store
 import {
   getDb, dbExists, clearChunks, resetDatabase,
   countChunks, bucketCounts, insertChunk, DB_PATH, EMBED_DIM,
-} from "beds24-knowledge";
-import type { ChunkRow } from "beds24-knowledge";
+} from "@jverneuer/beds24-knowledge";
+import type { ChunkRow } from "@jverneuer/beds24-knowledge";
 
 // embedding
-import { embed } from "beds24-knowledge";
+import { embed } from "@jverneuer/beds24-knowledge";
 
 // markdown
-import { chunkMarkdown } from "beds24-knowledge";
-import type { Chunk } from "beds24-knowledge";
-import { KNOWN_BUCKETS, SAFE_BUCKETS, parseFrontmatter } from "beds24-knowledge";
-import type { Bucket, Frontmatter } from "beds24-knowledge";
+import { chunkMarkdown } from "@jverneuer/beds24-knowledge";
+import type { Chunk } from "@jverneuer/beds24-knowledge";
+import { KNOWN_BUCKETS, SAFE_BUCKETS, parseFrontmatter } from "@jverneuer/beds24-knowledge";
+import type { Bucket, Frontmatter } from "@jverneuer/beds24-knowledge";
 
 // paths
-import { defaultKnowledgeDir } from "beds24-knowledge";
+import { defaultKnowledgeDir } from "@jverneuer/beds24-knowledge";
 ```
 
 ---

@@ -62,7 +62,7 @@ Restart your harness — the tools appear in every session. `setup` is idempoten
 ### 2. SDK route (typed V2 calls from your own code)
 
 ```ts
-import { Beds24Client, BookingOps } from "beds24-sdk-client";
+import { Beds24Client, BookingOps } from "@jverneuer/beds24-sdk-client";
 
 const client = new Beds24Client({ refreshToken: process.env.BEDS24_REFRESH_TOKEN });
 const { data, credits } = await new BookingOps(client).get({ arrivalFrom: "2026-09-01" });
@@ -74,7 +74,7 @@ Every `METHOD /path` in `apiV2.yaml` is reachable via `client.request("METHOD /p
 ### 3. Knowledge route (search / index pipeline)
 
 ```ts
-import { buildIndex, search } from "beds24-knowledge";
+import { buildIndex, search } from "@jverneuer/beds24-knowledge";
 
 // One-time (~30s) — builds the .beds24/index.db vector store.
 await buildIndex({ knowledgeDir: "./knowledge" });
