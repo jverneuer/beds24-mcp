@@ -37,7 +37,7 @@
     "reindex": "bun run packages/server/src/cli.ts index --force",
     "status": "bun run packages/server/src/cli.ts status",
     "setup": "bun run packages/server/src/cli.ts setup",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p packages/sdk/tsconfig.json && tsc --noEmit -p packages/knowledge/tsconfig.json && tsc --noEmit -p packages/server/tsconfig.json",
     "test": "bun test --isolate",
     "changeset": "changeset",
     "fetch-spec": "bun run scripts/fetch-spec.ts",

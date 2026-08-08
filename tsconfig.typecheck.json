@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // No path mappings — workspace packages resolve from their dist/
+    // (built by build:sdk / build:knowledge before typecheck in CI).
+  }
+}
