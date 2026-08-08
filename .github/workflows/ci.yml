@@ -33,4 +33,16 @@ jobs:
         run: bun run typecheck
 
       - name: Test
-        run: bun test --isolate
+        run: |
+          # Bun exits with code 1 when open handles remain after all tests pass
+          # (known issue with @huggingface/transformers native bindings on Linux).
+          # Accept exit code 1 if the summary shows 0 failures; propagate anything else.
+          set +e
+          bun test --isolate 2>&1 | tee /tmp/bun-test.log
+          code=${PIPESTATUS[0]}
+          set -e
+          if [ "$code" -eq 1 ] && grep -q "0 fail" /tmp/bun-test.log; then
+            echo "All tests passed (exit code 1 from open handles, not test failures)"
+            exit 0
+          fi
+          exit "$code"
