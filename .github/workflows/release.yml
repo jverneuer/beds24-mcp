@@ -60,11 +60,13 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Typecheck
-        run: bun run typecheck
-
+      # Build first so the server's typecheck can resolve @jverneuer/beds24-knowledge
+      # and @jverneuer/beds24-sdk-client from their dist/.
       - name: Build (CLI + SDK + knowledge bundles)
         run: bun run build
+
+      - name: Typecheck
+        run: bun run typecheck
 
       - name: Verify CLI bundle loads
         run: node packages/server/dist/cli.mjs status
