@@ -38,6 +38,7 @@ permissions:
   contents: write          # changesets/action creates/merges the Version Packages PR
   pull-requests: write     # same
   id-token: write          # npm trusted publishing (OIDC)
+  packages: write          # GitHub Packages publish (npm.pkg.github.com)
 
 # Never run two releases against main at once.
 concurrency:
