@@ -99,7 +99,9 @@ jobs:
           publish: bun changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # NPM_TOKEN intentionally not set: npm restricts tokens that bypass
+          # 2FA (E404 on PUT), so auth goes through OIDC trusted publishing —
+          # id-token: write above + the trusted publisher config on npmjs.com.
 
       # Publish to GitHub Packages. Packages are already scoped under
       # @jverneuer/*, so just pack and publish directly to npm.pkg.github.com.
