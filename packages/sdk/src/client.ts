@@ -13,6 +13,8 @@
  *   - `token`       → used directly, no minting
  * The token is sent as a `token:` header. On a 401 it refreshes once via the
  * refreshToken (single-flight — concurrent calls share one refresh promise).
+ * For bootstrap flows, `refreshToken` exposes the current refresh token and
+ * `ensureAuthenticated()` triggers the single-flight token fetch directly.
  *
  * Params/serialization:
  *   - GET/DELETE serialize `body` into the query string (arrays become repeated
@@ -138,7 +140,8 @@ function resolveSpecDir(): string {
 
 export class Beds24Client {
 	private inviteCode?: string;
-	private refreshToken?: string;
+	/** Backing store for the public `refreshToken` getter. */
+	private refreshTokenValue?: string;
 	private deviceName?: string;
 	private baseUrl: string;
 	private token: string | null;
@@ -152,12 +155,30 @@ export class Beds24Client {
 
 	constructor(config: Beds24ClientConfig) {
 		this.inviteCode = config.inviteCode;
-		this.refreshToken = config.refreshToken;
+		this.refreshTokenValue = config.refreshToken;
 		this.deviceName = config.deviceName;
 		this.baseUrl = (config.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, "");
 		this.token = config.token ?? null;
 		this.signal = config.signal;
 		this.endpoints = listEndpoints(resolveSpecDir());
+	}
+
+	/**
+	 * The refreshToken the client would mint its next token from — undefined
+	 * until an invite exchange or a config refreshToken provides one. Bootstrap
+	 * consumers persist this to a secret store right after `/authentication/setup`.
+	 */
+	get refreshToken(): string | undefined {
+		return this.refreshTokenValue;
+	}
+
+	/**
+	 * Trigger the single-flight token fetch once (invite exchange or refresh
+	 * mint) without an API call — lets a bootstrap consumer exchange an invite
+	 * code and then read the refreshToken off the client.
+	 */
+	async ensureAuthenticated(): Promise<void> {
+		await this.getToken();
 	}
 
 	/** Fetch (or refresh) the 24h token. Single-flight under concurrency. */
@@ -175,7 +196,7 @@ export class Beds24Client {
 		// Invite codes are single-time-use: exchange once, then live off the
 		// refreshToken it returns. See api-v2/auth-and-setup.md.
 		if (this.inviteCode) return this.fetchTokenFromInvite();
-		if (this.refreshToken) return this.fetchTokenFromRefresh();
+		if (this.refreshTokenValue) return this.fetchTokenFromRefresh();
 		throw new Beds24Error({
 			message: "auth failed: pass inviteCode, refreshToken, or token",
 			status: 0,
@@ -204,7 +225,7 @@ export class Beds24Client {
 			});
 		}
 		// Persist the refreshToken for future minting; invite codes are one-shot.
-		if (body.refreshToken) this.refreshToken = body.refreshToken;
+		if (body.refreshToken) this.refreshTokenValue = body.refreshToken;
 		this.inviteCode = undefined;
 		this.token = body.token;
 		return body.token;
@@ -214,7 +235,7 @@ export class Beds24Client {
 	private async fetchTokenFromRefresh(): Promise<string> {
 		const res = await fetch(`${this.baseUrl}/authentication/token`, {
 			method: "GET",
-			headers: { refreshToken: this.refreshToken!, accept: "application/json" },
+			headers: { refreshToken: this.refreshTokenValue!, accept: "application/json" },
 			signal: this.signal,
 		});
 		const body = (await res.json()) as { token?: string };

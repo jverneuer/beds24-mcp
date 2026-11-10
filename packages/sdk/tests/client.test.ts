@@ -184,3 +184,42 @@ describe("Beds24Client request validation", () => {
 		expect(mockFetch.calls()).toHaveLength(0);
 	});
 });
+
+describe("Beds24Client bootstrap", () => {
+	test("refreshToken getter returns the config-passed refreshToken", () => {
+		const client = new Beds24Client({ refreshToken: "rt-config" });
+		expect(client.refreshToken).toBe("rt-config");
+		// no refreshToken anywhere → undefined (not yet bootstrapped)
+		const bare = new Beds24Client({ token: "t" });
+		expect(bare.refreshToken).toBeUndefined();
+	});
+
+	test("captures the refreshToken returned by the invite exchange", async () => {
+		mockFetch.set([
+			// /authentication/setup → token + refreshToken
+			jsonResponse({ token: "tok-invite", refreshToken: "rt-invite" }),
+		]);
+		const client = new Beds24Client({ inviteCode: "INVITE" });
+		expect(client.refreshToken).toBeUndefined();
+		await client.ensureAuthenticated();
+		expect(mockFetch.calls()[0]!.url).toContain("/authentication/setup");
+		// the getter now exposes what /authentication/setup returned — persist it
+		expect(client.refreshToken).toBe("rt-invite");
+	});
+
+	test("ensureAuthenticated resolves once and the token is cached", async () => {
+		mockFetch.set([jsonResponse({ token: "tok-ensured" })]);
+		const client = new Beds24Client({ refreshToken: "rt" });
+		await Promise.all([client.ensureAuthenticated(), client.ensureAuthenticated()]);
+		// single-flight: exactly one auth fetch, against /authentication/token
+		expect(mockFetch.calls()).toHaveLength(1);
+		expect(mockFetch.calls()[0]!.url).toContain("/authentication/token");
+		// a subsequent request reuses the cached token — no second auth fetch
+		mockFetch.set([jsonResponse({ bookings: [] })]);
+		const res = await client.request("GET /bookings");
+		expect(res.data).toEqual({ bookings: [] });
+		expect(mockFetch.calls()).toHaveLength(1);
+		const headers = mockFetch.calls()[0]!.init?.headers as Record<string, string>;
+		expect(headers.token).toBe("tok-ensured");
+	});
+});

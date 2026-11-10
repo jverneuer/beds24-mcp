@@ -13,6 +13,8 @@
  *   - `token`       → used directly, no minting
  * The token is sent as a `token:` header. On a 401 it refreshes once via the
  * refreshToken (single-flight — concurrent calls share one refresh promise).
+ * For bootstrap flows, `refreshToken` exposes the current refresh token and
+ * `ensureAuthenticated()` triggers the single-flight token fetch directly.
  *
  * Params/serialization:
  *   - GET/DELETE serialize `body` into the query string (arrays become repeated
@@ -96,7 +98,8 @@ export interface Beds24ClientConfig {
 }
 export declare class Beds24Client {
     private inviteCode?;
-    private refreshToken?;
+    /** Backing store for the public `refreshToken` getter. */
+    private refreshTokenValue?;
     private deviceName?;
     private baseUrl;
     private token;
@@ -106,6 +109,18 @@ export declare class Beds24Client {
     /** All `METHOD /path` keys the spec knows about. */
     readonly endpoints: string[];
     constructor(config: Beds24ClientConfig);
+    /**
+     * The refreshToken the client would mint its next token from — undefined
+     * until an invite exchange or a config refreshToken provides one. Bootstrap
+     * consumers persist this to a secret store right after `/authentication/setup`.
+     */
+    get refreshToken(): string | undefined;
+    /**
+     * Trigger the single-flight token fetch once (invite exchange or refresh
+     * mint) without an API call — lets a bootstrap consumer exchange an invite
+     * code and then read the refreshToken off the client.
+     */
+    ensureAuthenticated(): Promise<void>;
     /** Fetch (or refresh) the 24h token. Single-flight under concurrency. */
     private getToken;
     private fetchToken;

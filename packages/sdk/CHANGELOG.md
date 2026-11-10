@@ -1,5 +1,11 @@
 # @jverneuer/beds24-sdk-client
 
+## 1.3.0
+
+### Minor Changes
+
+- Expose the invite-code bootstrap result on `Beds24Client`: a `refreshToken` getter (the current refreshToken — undefined until an invite exchange or a config refreshToken provides one) and an `ensureAuthenticated()` method (runs the single-flight token fetch once, so bootstrap consumers can exchange an invite code via `/authentication/setup` without a dummy API call and then persist the returned refreshToken to a secret store).
+
 ## 1.2.0
 
 ### Minor Changes
