@@ -186,6 +186,16 @@ export class Beds24Client {
 	}
 
 	/**
+	 * The current access token, if one is cached (config-passed or minted).
+	 * Fleet consumers (e.g. a shared gateway) persist this after minting so
+	 * sibling containers reuse the token instead of minting their own — each
+	 * mint costs credits (api-v2/auth-and-setup.md).
+	 */
+	get accessToken(): string | null {
+		return this.token;
+	}
+
+	/**
 	 * Trigger the single-flight token fetch once (invite exchange or refresh
 	 * mint) without an API call — lets a bootstrap consumer exchange an invite
 	 * code and then read the refreshToken off the client.
