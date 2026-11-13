@@ -1,5 +1,12 @@
 # @jverneuer/beds24-mcp-server
 
+## 1.2.2
+
+### Patch Changes
+
+- Updated dependencies [bcebfe0]
+  - @jverneuer/beds24-sdk-client@1.5.0
+
 ## 1.2.1
 
 ### Patch Changes
