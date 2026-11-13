@@ -86,6 +86,20 @@ describe("Beds24Client auth", () => {
 		expect(res.credits.resetsIn).toBe(299);
 	});
 
+	test("parses the per-request cost header into credits.requestCost", async () => {
+		mockFetch.set([jsonResponse({ bookings: [] }, { headers: { "x-request-cost": "2" } })]);
+		const client = new Beds24Client({ token: "t" });
+		const res = await client.request("GET /bookings");
+		expect(res.credits.requestCost).toBe(2);
+	});
+
+	test("requestCost is null when the header is absent (older accounts)", async () => {
+		mockFetch.set([jsonResponse({ bookings: [] })]);
+		const client = new Beds24Client({ token: "t" });
+		const res = await client.request("GET /bookings");
+		expect(res.credits.requestCost).toBeNull();
+	});
+
 	test("bootstraps from an invite code, then mints from the returned refreshToken", async () => {
 		mockFetch.set([
 			// /authentication/setup → token + refreshToken
@@ -148,6 +162,27 @@ describe("Beds24Client errors", () => {
 		expect(caught!.status).toBe(429);
 		expect(caught!.code).toBe(ErrorCode.UsageLimitExceeded);
 		expect(caught!.retryable).toBe(true);
+	});
+
+	test("maps 1020 (usage limit, alt) identically to 1016 — retryable, with freeze info", async () => {
+		mockFetch.set([
+			new Response(JSON.stringify({ code: 1020, message: "rate limit" }), {
+				status: 429,
+				headers: { "x-five-min-limit-remaining": "0", "x-five-min-limit-resets-in": "120" },
+			}),
+		]);
+		const client = new Beds24Client({ token: "t" });
+		let caught: Beds24Error | undefined;
+		try {
+			await client.request("GET /bookings");
+		} catch (e) {
+			caught = e as Beds24Error;
+		}
+		expect(caught!.code).toBe(ErrorCode.UsageLimitExceededAlt);
+		expect(caught!.retryable).toBe(true);
+		// FR-10 freeze math needs resetsIn off the failing response
+		expect(caught!.credits?.resetsIn).toBe(120);
+		expect(caught!.creditsRemaining).toBe(0);
 	});
 
 	test("network errors are retryable with status 0", async () => {

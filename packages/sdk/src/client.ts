@@ -48,6 +48,12 @@ export interface Credits {
 	remaining: number | null;
 	/** Seconds until the window resets. */
 	resetsIn: number | null;
+	/**
+	 * Actual credit cost of THIS request (`x-request-cost` header, C-2 of
+	 * docs/beds24-gateway-requirements.md). Absent on some error paths and
+	 * older accounts — debit logic must fall back to the remaining-delta.
+	 */
+	requestCost: number | null;
 }
 
 /** A successful API response, with credit state attached. */
@@ -76,6 +82,11 @@ export class Beds24Error extends Error {
 	readonly retryable: boolean;
 	/** Credit state at the time of the error (null if unavailable). */
 	readonly creditsRemaining: number | null;
+	/**
+	 * FULL credit state on the failing response — `resetsIn` drives the
+	 * rate-limit freeze (FR-10), `requestCost` the debit reconciliation.
+	 */
+	readonly credits: Credits | null;
 
 	constructor(opts: {
 		message: string;
@@ -83,6 +94,7 @@ export class Beds24Error extends Error {
 		code?: number | null;
 		retryable?: boolean;
 		creditsRemaining?: number | null;
+		credits?: Credits | null;
 	}) {
 		super(opts.message);
 		this.name = "Beds24Error";
@@ -90,6 +102,7 @@ export class Beds24Error extends Error {
 		this.code = opts.code ?? null;
 		this.retryable = opts.retryable ?? false;
 		this.creditsRemaining = opts.creditsRemaining ?? null;
+		this.credits = opts.credits ?? null;
 	}
 }
 
@@ -386,8 +399,20 @@ export class Beds24Client {
 			body && typeof body === "object" && "message" in body
 				? String((body as { message: unknown }).message)
 				: `request failed: ${status}`;
-		const retryable = status >= 500 || code === ErrorCode.UsageLimitExceeded;
-		return new Beds24Error({ message, status, code, retryable, creditsRemaining: credits.remaining });
+		// 1016 AND 1020 mean "usage limit exceeded in the last 5 minutes"
+		// (knowledge/beds24.md §3) — both are window resets, both retryable.
+		const retryable =
+			status >= 500 ||
+			code === ErrorCode.UsageLimitExceeded ||
+			code === ErrorCode.UsageLimitExceededAlt;
+		return new Beds24Error({
+			message,
+			status,
+			code,
+			retryable,
+			creditsRemaining: credits.remaining,
+			credits,
+		});
 	}
 }
 
@@ -395,8 +420,10 @@ export class Beds24Client {
 function parseCredits(res: Response): Credits {
 	const remaining = res.headers.get("x-five-min-limit-remaining");
 	const resetsIn = res.headers.get("x-five-min-limit-resets-in");
+	const requestCost = res.headers.get("x-request-cost");
 	return {
 		remaining: remaining ? Number(remaining) : null,
 		resetsIn: resetsIn ? Number(resetsIn) : null,
+		requestCost: requestCost ? Number(requestCost) : null,
 	};
 }
