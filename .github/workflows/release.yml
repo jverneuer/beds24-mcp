@@ -104,10 +104,12 @@ jobs:
           # 2FA (E404 on PUT), so auth goes through OIDC trusted publishing —
           # id-token: write above + the trusted publisher config on npmjs.com.
 
-      # Publish to GitHub Packages. Packages are already scoped under
+      # Sync all packages to GitHub Packages. Packages are already scoped under
       # @jverneuer/*, so just pack and publish directly to npm.pkg.github.com.
-      - name: Publish to GitHub Packages
-        if: steps.changesets.outputs.published == 'true'
+      # Runs on every push to main, not only when changesets published: the
+      # npm side and this mirror can drift (e.g. a re-run of a partially
+      # failed release publishes to npm but never reaches this step).
+      - name: Sync to GitHub Packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -117,6 +119,15 @@ jobs:
           for pkg_dir in packages/sdk packages/knowledge packages/server; do
             name=$(node -p "require('./$pkg_dir/package.json').name")
             version=$(node -p "require('./$pkg_dir/package.json').version")
+
+            # Unlike changeset publish (which skips versions already on npm),
+            # npm publish hard-errors on an existing version — check first so
+            # re-runs and unchanged packages don't fail the step.
+            existing=$(npm view "$name@$version" version --registry https://npm.pkg.github.com 2>/dev/null | tr -d '[:space:]')
+            if [ "$existing" = "$version" ]; then
+              echo "$name@$version already on GitHub Packages — skipping."
+              continue
+            fi
 
             echo "Publishing $name@$version to GitHub Packages..."
 
